@@ -1,0 +1,36 @@
+# Environment Variables
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+env/
+build/
+dist/
+*.egg-info/
+
+# Instagram Session & Cookies (Critical security)
+session.json
+*.session
+browser_cookies.json
+browser_state/
+
+# Logs
+*.log
+logs/
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+
+# Local DBs and Storage (if any generated)
+*.db
+*.sqlite3
+storage/
+
+# Pytest
+.pytest_cache/
