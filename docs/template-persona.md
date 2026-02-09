@@ -1,104 +1,104 @@
-# 🧠 Guia de Identidade e Voz (Brand Persona)
+# 🧠 Identity and Voice Guide (Brand Persona)
 
-**Última atualização:** [Data]
-
----
-
-## 1. 👤 Quem é a Pessoa? (Bio Estratégica)
-
-### O "Elevator Pitch" (Quem sou eu em 1 tweet?)
-> *Resumo curto e impactante.*
-> **Exemplo:** "Fundador técnico que cansou do 'corporate bullshit'. Construo produtos reais em público e ensino outros devs a virarem empreendedores."
-
-### Pilares de Autoridade (Por que me escutar?)
-*Liste 3 a 5 fatos que validam sua experiência.*
-* [Fato 1 - Ex: 10 anos de mercado / X milhões faturados]
-* [Fato 2 - Ex: Errei feio no projeto X e aprendi Y]
-* [Fato 3 - Ex: Criei a metodologia Z]
-
-### Inimigo Comum (Contra o que eu luto?)
-*O que me irrita no meu mercado?*
-* ( ) Gurus falsos
-* ( ) Complexidade desnecessária
-* ( ) Falta de transparência
-* ( ) "Hype" sem fundamento
-
-### Crenças Inegociáveis (Valores)
-1.  **[Valor 1]:** (Ex: Transparência radical – mostro até o prejuízo).
-2.  **[Valor 2]:** (Ex: Simplicidade – se o júnior não entender, refaz).
-3.  **[Valor 3]:** (Ex: Execução > Planejamento).
+**Last updated:** [Date]
 
 ---
 
-## 2. 🗣️ O Tom de Voz (Tone of Voice)
+## 1. 👤 Who is the Persona? (Strategic Bio)
 
-### A Regra dos 3 Adjetivos
-*Defina o estilo em 3 palavras e explique o "mas".*
+### The "Elevator Pitch" (Who am I in 1 tweet?)
+> *Short and impactful summary.*
+> **Example:** "Technical founder tired of corporate bullshit. Building real products in public and teaching other devs to become entrepreneurs."
 
-1.  **[Adjetivo 1]**, mas não **[Exagero]**.
-    * *Ex: "Autoritário, mas não arrogante."*
-2.  **[Adjetivo 2]**, mas não **[Exagero]**.
-    * *Ex: "Engraçado, mas não bobo da corte."*
-3.  **[Adjetivo 3]**, mas não **[Exagero]**.
-    * *Ex: "Técnico, mas não acadêmico chato."*
+### Pillars of Authority (Why listen to me?)
+*List 3 to 5 facts that validate your experience.*
+* [Fact 1 - e.g., 10 years in the market / $X million in revenue]
+* [Fact 2 - e.g., Major failure in project X and what was learned]
+* [Fact 3 - e.g., Created methodology Z]
 
-### Nível de Formalidade (Escala 0-10)
-* **( ) 0-3:** Conversa de bar, gírias, palavrões eventuais, muita informalidade.
-* **( ) 4-6:** Café com colega de trabalho, profissional mas relaxado.
-* **( ) 7-10:** Palestra, reunião de board, zero gírias, português impecável.
+### Common Enemy (What am I fighting against?)
+*What annoys me in my market?*
+* ( ) Fake gurus
+* ( ) Unnecessary complexity
+* ( ) Lack of transparency
+* ( ) Groundless "hype"
 
----
-
-## 3. 📝 Engenharia do Texto (Guia de Estilo)
-
-### Vocabulário e Dicionário Pessoal
-* **Palavras que eu AMO (Use sempre):**
-    * [Lista de palavras/bordões]
-* **Palavras que eu ODEIO (Blacklist - Nunca use):**
-    * [Lista de palavras proibidas/clichês]
-* **Jargões Técnicos:**
-    * ( ) Evitar ao máximo.
-    * ( ) Usar, mas explicar entre parênteses.
-    * ( ) Usar sem dó (meu público é expert).
-
-### Formatação Visual
-* **Emojis:** [ ] Nunca | [ ] Poucos (1 por post) | [ ] Muitos (para pontuar frases)
-    * *Meus favoritos:* 🚀, 🔥, 👊, 👀
-* **Pontuação:**
-    * Uso exclamações!!! (Sim/Não)
-    * Uso reticências... para dar suspense (Sim/Não)
-    * Começo frases com minúscula estilo Twitter (Sim/Não)
-* **Estrutura de Parágrafo:**
-    * ( ) Blocos longos e densos.
-    * ( ) Frases curtas, uma linha por vez (ritmo rápido).
+### Non-negotiable Beliefs (Values)
+1.  **[Value 1]:** (e.g., Radical transparency – I even show my losses).
+2.  **[Value 2]:** (e.g., Simplicity – if a junior dev doesn't get it, redo it).
+3.  **[Value 3]:** (e.g., Execution > Planning).
 
 ---
 
-## 4. ❌ vs ✅ (Exemplos Práticos)
+## 2. 🗣️ Tone of Voice
 
-*A melhor forma de calibrar a IA ou o redator.*
+### The Rule of 3 Adjectives
+*Define the style in 3 words and explain the "but".*
 
-| Contexto | ❌ NÃO ESCREVA ASSIM (Genérico/Chato) | ✅ ESCREVA ASSIM (Minha Voz) |
+1.  **[Adjective 1]**, but not **[Exaggeration]**.
+    * *Example: "Authoritative, but not arrogant."*
+2.  **[Adjective 2]**, but not **[Exaggeration]**.
+    * *Example: "Funny, but not a court jester."*
+3.  **[Adjective 3]**, but not **[Exaggeration]**.
+    * *Example: "Technical, but not a boring academic."*
+
+### Formality Level (Scale 0-10)
+* **( ) 0-3:** Bar talk, slang, occasional swearing, high informality.
+* **( ) 4-6:** Coffee with a colleague, professional but relaxed.
+* **( ) 7-10:** Lecture, board meeting, zero slang, impeccable English.
+
+---
+
+## 3. 📝 Text Engineering (Style Guide)
+
+### Vocabulary and Personal Dictionary
+* **Words I LOVE (Always use):**
+    * [List of words/catchphrases]
+* **Words I HATE (Blacklist - Never use):**
+    * [List of forbidden words/cliches]
+* **Technical Jargon:**
+    * ( ) Avoid as much as possible.
+    * ( ) Use, but explain in parentheses.
+    * ( ) Use without hesitation (my audience consists of experts).
+
+### Visual Formatting
+* **Emojis:** [ ] Never | [ ] Few (1 per post) | [ ] Many (to punctuate sentences)
+    * *My favorites:* 🚀, 🔥, 👊, 👀
+* **Punctuation:**
+    * Use exclamation marks!!! (Yes/No)
+    * Use ellipses... for suspense (Yes/No)
+    * Start sentences with lowercase, Twitter-style (Yes/No)
+* **Paragraph Structure:**
+    * ( ) Long and dense blocks.
+    * ( ) Short sentences, one line at a time (fast-paced rhythm).
+
+---
+
+## 4. ❌ vs ✅ (Practical Examples)
+
+*The best way to calibrate the AI or writer.*
+
+| Context | ❌ DON'T WRITE LIKE THIS (Generic/Boring) | ✅ WRITE LIKE THIS (My Voice) |
 | :--- | :--- | :--- |
-| **Dando uma opinião** | "Acredito que essa ferramenta pode ser útil dependendo do contexto." | "Sinceramente? Essa ferramenta é um canhão pra matar mosca. Ninguém precisa disso." |
-| **Ensinando algo** | "É importante observar a métrica de retenção para garantir o sucesso." | "Esquece aquisição. Se o balde tá furado (retenção baixa), você só tá queimando dinheiro." |
-| **Comemorando** | "Estamos muito felizes com o resultado alcançado pela equipe." | "Quebramos tudo. Time voou hoje. Orgulho define." |
-| **Falando de erro** | "Cometemos um equívoco no planejamento." | "Errei. Fui ingênuo no planejamento e a conta chegou." |
+| **Giving an opinion** | "I believe this tool can be useful depending on the context." | "Honestly? This tool is like using a cannon to kill a fly. Nobody needs this." |
+| **Teaching something** | "It is important to observe the retention metric to ensure success." | "Forget acquisition. If the bucket is leaking (low retention), you're just burning money." |
+| **Celebrating** | "We are very happy with the result achieved by the team." | "We crushed it. The team was flying today. Pure pride." |
+| **Talking about a mistake** | "We made an error in the planning." | "I messed up. I was naive in the planning and the bill arrived." |
 
 ---
 
-## 5. 📺 Adaptação por Canal
+## 5. 📺 Adaptation by Channel
 
-* **Linkedin:** Foco em aprendizado, carreira e bastidores de negócios. Tom mais sóbrio.
-* **Instagram (Stories):** Vida real, academia, café, setup. Tom 100% informal.
-* **Newsletter/Blog:** Profundo, analítico, contraintuitivo. Pode ser longo.
-* **Twitter/X:** Ácido, curto, polêmico, "hot takes".
+* **LinkedIn:** Focus on learning, career, and business behind-the-scenes. More sober tone.
+* **Instagram (Stories):** Real life, gym, coffee, setup. 100% informal tone.
+* **Newsletter/Blog:** Deep, analytical, counter-intuitive. Can be long.
+* **Twitter/X:** Acidic, short, controversial, "hot takes".
 
 ---
 
-## 6. 📚 Fontes de Inspiração
+## 6. 📚 Sources of Inspiration
 
-*Se eu não souber o que escrever, olhe para:*
-1.  [Link de um post antigo que bombou]
-2.  [Link de um vídeo que representa bem a fala]
-3.  [Nome de um autor/influencer que tem o estilo parecido]
+*If I don't know what to write, look at:*
+1.  [Link to an old post that went viral]
+2.  [Link to a video that represents the speech well]
+3.  [Name of an author/influencer with a similar style]

@@ -1,6 +1,6 @@
 # 🗺️ Roadmap Atualizado: NetBot "Digital Twin"
 
-**Status do Projeto:** 🟡 Em Transição (PoC → V1)
+**Status do Projeto:** 🟡 Em Transição (V1 → V1.1)
 **Visão:** Validar a "Alma" do bot com memória de longo prazo, inteligência social (análise de perfil) e expansão para redes de texto.
 
 ---
@@ -27,6 +27,7 @@
 * **Funcionalidades:**
     * [x] **RAG Engine (`core/knowledge_base.py`):** Sistema de busca semântica (`pgvector`) para o Agente consultar "Como o Guilherme responderia isso?".
     * [x] **Agent Update:** Atualizar o `core/agent.py` para consultar a `KnowledgeBase` antes de chamar a OpenAI.
+    * [x] **Database Optimization:** Migração para operações atômicas (RPC) no Supabase para evitar condições de corrida (Race Conditions).
 
 ### 2. A Empatia (Audience Awareness) **[NOVO]**
 *Entender quem está do outro lado para adaptar o tom (Code Switching).*

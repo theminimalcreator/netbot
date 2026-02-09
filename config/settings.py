@@ -33,7 +33,7 @@ class Settings:
     PROXY_URL = os.getenv("PROXY_URL", None)
     
     # Debug mode - show browser window
-    DEBUG_HEADLESS = os.getenv("DEBUG_HEADLESS", "False").lower()
+    DEBUG_HEADLESS = os.getenv("DEBUG_HEADLESS", "True").lower() == "true"
 
     # Files
     VIP_LIST_PATH = CONFIG_DIR / "vip_list.json"

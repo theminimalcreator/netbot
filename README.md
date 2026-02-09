@@ -1,93 +1,107 @@
-# 🤖 NetBot - Instagram AI Persona
+# 🤖 NetBot: The "Digital Twin" Framework
 
-> **Automated Engagement Agent powered by GPT-4o Vision & Agno Framework.**
+> **Autonomous Digital Presence Engineering powered by Multimodal AI & RAG.**
 
-**NetBot** is an intelligent autonomous agent designed to interact on Instagram by simulating human behavior. Unlike traditional bots that use private APIs (risky) or generic comments, NetBot "looks" at the post, understands the context (caption + image), and generates relevant and authentic comments.
+The **NetBot** is a high-level autonomous agent designed to act as a **Digital Twin**. It doesn't just "post" or "comment"—it understands context through Vision AI, maintains technical authority via RAG, and simulates human-like interaction to scale presence without losing authenticity.
 
-## ✨ Key Features
-
-- **🧠 Multimodal Intelligence (Vision + Text):** Uses `GPT-4o` (via **Agno** framework) to analyze the post's image and caption before interacting.
-- **🕵️ Human-Like Navigation (Playwright):**
-  - Uses a **real browser** (Chromium) to navigate Instagram.
-  - Clicks, types, and scrolls like a human.
-  - Maintains **session cookies** to avoid constant logins and suspicion.
-- **🎯 Intelligent Hybrid Discovery:**
-  - **70% VIP List:** Focuses on high-relevance profiles defined by you.
-  - **30% Hashtags:** Explores new content in specific niches.
-- **🛡️ Safety & Anti-Ban:**
-  - **Daily Limits:** Controlled via database to not exceed safe rates.
-  - **Jitter (Random Intervals):** Variable pauses between actions (e.g., 10-50 min) to appear natural.
-  - **Duplication Check:** Never interacts with the same post twice.
-- **🧠 RAG Memory (Concept Learning):**
-  - Remembers past interactions (Vector DB).
-  - Learns from your previous comments to maintain a consistent style and opinion.
-- **☁️ Supabase Integration:** Stores interaction logs, vector embeddings, daily statistics, and errors in the cloud.
+This project is **Open Source** and serves as a laboratory for **Modular Agentic Workflows**.
 
 ---
 
-## 🏗️ Project Architecture
+## 🏗️ System Architecture
 
-The project follows a **modular event-driven architecture**, designed to support multiple social platforms with a shared AI brain.
+NetBot follows a **Modular & Event-Driven** design, strictly separating the "Brain" (AI Logic) from the "Body" (Platform Clients). This ensures the core intelligence remains agnostic to the social network being used.
 
-- **`core/agent.py` (The Brain):** Platform-agnostic AI agent. Uses OpenAI/Agno to analyze content and decide on actions, regardless of the source network.
-- **`core/interfaces.py` (The Contracts):** Defines abstract base classes (`SocialNetworkClient`, `DiscoveryStrategy`) that all network modules must implement.
-- **`core/networks/` (The Limbs):** Contains platform-specific implementations.
-  - **`instagram/client.py`:** Controls the browser via Playwright for Instagram.
-  - **`instagram/discovery.py`:** Finds candidates on Instagram (VIPs vs Hashtags).
-- **`core/database.py` (The Memory):** Manages data persistence in Supabase, tracking interactions across all platforms.
-- **`main.py` (The Conductor):** Main loop that orchestrates interaction cycles for all enabled networks.
+### Logic Flow
+```mermaid
+graph TD
+    A[Orchestrator] -->|Loop| B(Discovery Strategy)
+    B -->|Candidates| C{Agent Analysis}
+    C -->|Retrieve History| K[(Knowledge Base/RAG)]
+    K -->|Context| C
+    C -->|No| D[Skip]
+    C -->|Yes| E[Action Decision]
+    E -->|Execute| F[Social Network Client]
+    F -->|Log & Embed| G[(Supabase)]
+    G -->|Update Stats| A
+```
+
+### Core Components:
+* **🧠 The Brain (`core/agent.py`):** Centralized AI powered by **Agno**. It evaluates posts using **Multimodal Intelligence** (Vision + Text) to decide if an action aligns with your persona.
+* **📚 Knowledge Base (`core/knowledge_base.py`):** A RAG engine using **pgvector** to retrieve your past interactions. This ensures the bot's opinions and tone evolve like a real "Digital Twin".
+* **🦾 Network Clients (`core/networks/`):** Implementation of the `BaseNetworkClient` interface. Currently supports Instagram via **Playwright**, simulating real browser behavior like scrolling and human-like typing.
+* **📊 Persistence (`core/database.py`):** Atomic logging and daily limit tracking via **Supabase** to ensure account safety and prevent rate-limit bans.
 
 ---
 
-## 🛠️ Technologies
+## 🧠 Intelligence & Vision
 
-- **Python 3.10+**
-- **[Agno Framework](https://github.com/agno-agi/agno):** AI Agent Orchestration.
-- **[Playwright](https://playwright.dev/):** Modern and resilient browser automation.
-- **[Supabase](https://supabase.com/):** Database (PostgreSQL) as a Service.
-- **OpenAI GPT-4o-mini:** Language and vision model.
+We currently use **GPT-4o-mini** for development and testing as it is the most cost-effective option for validating complex agentic flows.
+
+> **⚠️ Engineering Note:** For production environments where high-fidelity visual analysis and deep technical nuance are required, I recommend using more robust models (such as the full **GPT-4o** or later versions) to ensure the highest quality of interaction.
 
 ---
 
-## 🚀 Installation and Usage
+## 🗺️ Roadmap: The Journey to a Digital Twin
 
-### 1. Prerequisites
-- Python 3.10+
-- OpenAI Account (API Key)
-- Supabase Project (URL and Key)
+The project is structured in phases, moving from basic infrastructure to high-level social empathy and cross-platform authority.
 
-### 2. Setup
-1. Clone the repository.
-2. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   playwright install chromium
-   ```
-3. Configure `.env` (use `.env.example` as a base):
-   ```bash
-   OPENAI_API_KEY=sk-...
-   SUPABASE_URL=https://...
-   SUPABASE_KEY=ey...
-   IG_USERNAME=your_username
-   IG_PASSWORD=your_password
-   ```
+### 🟢 Phase 0: The Foundation (Completed)
+**Focus:** Infrastructure, Safety, and Vision.
+* **Modular Design:** Core structure defined to support multiple social clients.
+* **Vision AI:** Agent capable of "seeing" images to generate context-aware responses.
+* **Discovery:** Hybrid strategy (VIP lists + Hashtags) successfully implemented.
 
-### 3. Customization
-- **VIPs:** VIP profile lists and Hashtags are in `config/`.
+### 🚧 Phase 1: The "Digital Twin" (Current Focus)
+**Focus:** Memory and Social Empathy.
+* **Knowledge Base (RAG):** Semantic search integration for the agent to consult "How would Guilherme answer this?".
+* **Audience Awareness:** Developing a *Profile Scraper* to analyze target bios and recent posts to generate a "Dossier" for personalized interaction.
+* **Text Expansion:** Initial support for **Threads** and **X (Twitter)**.
 
-- **Persona:** 
-    - Edit `config/prompts.yaml` to defend your **Bio**, **Traits**, and **Tone**.
-    - **RAG Learning:** The bot remembers past interactions and adapts its style to match your previous comments.
+### 📅 Phase 2: The Specialist
+**Focus:** Long-form content and technical authority.
+* **Deep Reading:** Scaling RAG to process and discuss technical articles from **Dev.to** or **Medium**.
+* **Community Engagement:** Expanding the "Digital Twin" presence to platforms like **Reddit**.
 
-### 4. Running
+### 📅 Phase 3: The Creator & Enterprise
+**Focus:** Active content generation and B2B.
+* **Trend Watcher:** Monitoring GitHub Trending and Hacker News to initiate original discussions.
+* **LinkedIn Client:** Ultra-secure navigation focused on professional networking and lead triaging.
+
+---
+
+## 🛠️ Tech Stack
+* **Python 3.10+**
+* **Agno Framework:** Agent orchestration.
+* **Playwright:** Resilient browser automation.
+* **Supabase:** PostgreSQL + `pgvector` for semantic memory.
+
+---
+
+## 🚀 Getting Started & Persona Setup
+
+### 1. Installation
+```bash
+pip install -r requirements.txt
+playwright install chromium
+```
+
+### 2. Configure Your Digital Twin (Persona)
+The bot's behavior is driven by a specific persona document:
+1. Create a folder: `docs/persona/`.
+2. Copy `docs/template-persona.md` into that folder.
+3. Fill it with your specific traits, technical background, and tone.
+4. Save it as `docs/persona/persona.md`.
+
+### 3. Environment & Run
+Set your keys in `.env` (refer to `.env.example`) and start the orchestrator:
 ```bash
 python main.py
 ```
 
-> **Note:** By default, the bot may start in `DRY_RUN` mode (simulation only, no real comments). Check `config/settings.py` to adjust.
-
 ---
 
-## ⚠️ Disclaimer
+⚠️ Disclaimer
+This is an educational tool. Automating social accounts violates most ToS and may lead to account suspension. Use it to study AI orchestration and browser automation at your own risk.
 
-This project is for **educational purposes**. Using automation on social networks (bots) violates Instagram's Terms of Service and may lead to your account being blocked. **Use at your own risk.**
+Build with me. Contributions and PRs are welcome!

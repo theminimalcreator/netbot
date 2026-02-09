@@ -40,7 +40,7 @@ graph TD
 *   **`interfaces.py`:** Abstract Base Classes (ABCs) defining the contract for new networks:
     *   `SocialNetworkClient`: Methods like `login()`, `like_post()`, `post_comment()`.
     *   `DiscoveryStrategy`: Methods to find content (`find_candidates()`).
-*   **`database.py`:** Handles persistence to Supabase.
+*   **`database.py`:** Handles persistence to Supabase. Includes atomic operations via RPC (e.g., `increment_daily_stats`) to prevent race conditions during concurrent interactions.
 
 ### 🔌 Network Layer (`core/networks/`)
 Each platform is a self-contained module implementing the Core Interfaces.
@@ -68,9 +68,11 @@ The `SocialNetworkClient` extracts:
 
 ### 🤖 Decision & Execution
 1.  **Agent** receives the standardized `SocialPost`.
-2.  **LLM** analyzes alignment with the Persona.
-3.  **Output:** Structured `ActionDecision` (ACT or SKIP).
-4.  **Client** executes the action (Like/Comment) using human-like delays (Jitter).
+2.  **RAG Context:** Agent queries `NetBotKnowledgeBase` (pgvector) to find similar past interactions for tone consistency and memory.
+3.  **LLM** analyzes alignment with the Persona and provided context.
+4.  **Output:** Structured `ActionDecision` (ACT or SKIP).
+5.  **Client** executes the action (Like/Comment) using human-like delays (Jitter).
+6.  **Persistence:** Action is logged in `interactions` and daily counts are incremented atomically via RPC.
 
 ## 5. Folder Structure
 
