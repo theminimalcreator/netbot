@@ -34,6 +34,10 @@ storage/
 
 # Pytest
 .pytest_cache/
-
 # Documentation
 docs/persona/persona.md
+
+# Configs com pessoas e hashtags que sigo
+config/hashtags.json
+config/vip_list.json
+
