@@ -9,7 +9,7 @@ import logging
 from typing import Optional, Dict, Any, List
 from config.settings import settings
 from core.database import db
-from core.networks.instagram.client import client
+from core.networks.instagram.client import InstagramClient
 from core.interfaces import DiscoveryStrategy
 from core.models import SocialPost
 
@@ -17,9 +17,10 @@ logger = logging.getLogger(__name__)
 
 
 class InstagramDiscovery(DiscoveryStrategy):
-    def __init__(self):
-        self.vip_list = settings.load_vip_list()
-        self.hashtags = settings.load_hashtags()
+    def __init__(self, client: InstagramClient):
+        self.client = client
+        self.vip_list = settings.load_vip_list("instagram")
+        self.hashtags = settings.load_hashtags("instagram")
 
     def find_candidates(self, limit: int = 5) -> List[SocialPost]:
         """
@@ -56,7 +57,7 @@ class InstagramDiscovery(DiscoveryStrategy):
         logger.info(f"Discovery: Checking VIP @{target_user}")
         
         # Fetch more to allow for filtering
-        return client.get_user_latest_posts(target_user, limit=amount)
+        return self.client.get_user_latest_posts(target_user, limit=amount)
 
     def _fetch_from_discovery(self, amount: int) -> List[SocialPost]:
         """Pick a random hashtag and get top posts."""
@@ -65,7 +66,7 @@ class InstagramDiscovery(DiscoveryStrategy):
         
         # Fetch more to allow for filtering
         # Note: client.search_posts wraps get_hashtag_top_medias
-        posts = client.search_posts(target_tag, limit=amount)
+        posts = self.client.search_posts(target_tag, limit=amount)
         random.shuffle(posts)
         return posts
 
@@ -91,5 +92,4 @@ class InstagramDiscovery(DiscoveryStrategy):
             
         return True
 
-
-discovery = InstagramDiscovery()
+# Singleton removed — clients are now created per cycle in main.py

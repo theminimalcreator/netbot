@@ -7,6 +7,7 @@ from config.settings import settings
 from core.logger import logger
 from core.models import SocialPost, ActionDecision, SocialPlatform
 from core.knowledge_base import NetBotKnowledgeBase
+from core.profile_analyzer import ProfileDossier
 
 # --- Structured Output Schema ---
 # We reuse ActionDecision from models, but Agno might need a Pydantic model for output parsing
@@ -71,7 +72,7 @@ class SocialAgent:
             markdown=True
         )
 
-    def decide_and_comment(self, post: SocialPost) -> ActionDecision:
+    def decide_and_comment(self, post: SocialPost, dossier: Optional[ProfileDossier] = None) -> ActionDecision:
         """
         Analyzes a candidate post and returns an ActionDecision.
         """
@@ -82,14 +83,42 @@ class SocialAgent:
                 formatted_comments = "\n".join([f"- @{c.author.username}: {c.text}" for c in post.comments])
                 comments_context = f"\nRecent Comments (for context):\n{formatted_comments}"
 
+            # Prepare Dossier Context
+            dossier_context = ""
+            if dossier:
+                dossier_context = f"""
+                ## TARGET AUDIENCE DOSSIER (@{post.author.username})
+                - Summary: {dossier.summary}
+                - Technical Level: {dossier.technical_level}
+                - Interests: {', '.join(dossier.interests)}
+                - Tone Preference: {dossier.tone_preference}
+                - INTERACTION GUIDELINES: {dossier.interaction_guidelines}
+                
+                IMPORTANT: Adapt your response to match this person's level and tone.
+                """
+
+            # Determines constraints based on platform
+            char_limit = "280 characters" if post.platform == SocialPlatform.TWITTER else "proportional to the post length"
+            if post.platform == SocialPlatform.TWITTER:
+                style_guide = "Style: Use abbreviations if needed, no hashtags unless relevant, casual but professional."
+            elif post.platform == SocialPlatform.THREADS:
+                style_guide = "Style: Conversational, threading-friendly, casual."
+            elif post.platform == SocialPlatform.LINKEDIN:
+                style_guide = "Style: Professional, constructive, slightly more formal."
+            else:
+                style_guide = "Style: Casual, helpful, Instagram-native."
+
             user_input = f"""
             Analyze this {post.platform.value} Post:
             - Author: @{post.author.username}
             - Content: "{post.content}"
             - Media Type: {post.media_type}
+            {dossier_context}
             {comments_context}
             
             Determine if I should comment. If yes, write the comment.
+            - Constraint: Max {char_limit}.
+            - {style_guide}
             """
             
             logger.info(f"Agent analyzing post {post.id} by {post.author.username} on {post.platform.value}...")

@@ -17,6 +17,12 @@ session.json
 *.session
 browser_cookies.json
 browser_state/
+config/hashtags_threads.json
+config/hashtags_instagram.json
+config/vip_list_threads.json
+config/vip_list_instagram.json
+config/hashtags_twitter.json
+config/vip_list_twitter.json
 
 # Logs
 *.log

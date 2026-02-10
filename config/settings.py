@@ -24,7 +24,16 @@ class Settings:
     PG_DATABASE_URL = os.getenv("PG_DATABASE_URL")
 
     # Bot Limits
-    daily_interaction_limit = int(os.getenv("DAILY_INTERACTION_LIMIT", "2"))
+    # Bot Limits
+    # Default Limits per platform
+    DAILY_LIMITS = {
+        "instagram": int(os.getenv("LIMIT_INSTAGRAM", "10")),
+        "twitter": int(os.getenv("LIMIT_TWITTER", "30")),
+        "threads": int(os.getenv("LIMIT_THREADS", "15")),
+        "linkedin": int(os.getenv("LIMIT_LINKEDIN", "30"))
+    }
+    # Legacy fallback (max across all if needed, but main.py will use specific)
+    daily_interaction_limit = max(DAILY_LIMITS.values())
     min_sleep_interval = int(os.getenv("MIN_SLEEP_INTERVAL", "600")) # 10 minutes
     max_sleep_interval = int(os.getenv("MAX_SLEEP_INTERVAL", "3000")) # 50 minutes
     dry_run = os.getenv("DRY_RUN", "True").lower() == "true"
@@ -56,14 +65,30 @@ class Settings:
     }
 
     @classmethod
-    def load_vip_list(cls):
+    def load_vip_list(cls, platform: str = None):
+        """Loads VIP list. Tries platform specific first (e.g. vip_list_instagram.json), then falls back to default."""
+        if platform:
+            specific_path = cls.CONFIG_DIR / f"vip_list_{platform}.json"
+            if specific_path.exists():
+                with open(specific_path, "r") as f:
+                    return json.load(f)
+        
+        # Fallback
         if cls.VIP_LIST_PATH.exists():
             with open(cls.VIP_LIST_PATH, "r") as f:
                 return json.load(f)
         return []
 
     @classmethod
-    def load_hashtags(cls):
+    def load_hashtags(cls, platform: str = None):
+        """Loads Hashtags. Tries platform specific first, then falls back to default."""
+        if platform:
+            specific_path = cls.CONFIG_DIR / f"hashtags_{platform}.json"
+            if specific_path.exists():
+                with open(specific_path, "r") as f:
+                    return json.load(f)
+
+        # Fallback
         if cls.HASHTAGS_PATH.exists():
             with open(cls.HASHTAGS_PATH, "r") as f:
                 return json.load(f)

@@ -6,14 +6,14 @@ from core.models import SocialPost, SocialPlatform, SocialAuthor
 
 @pytest.fixture
 def mock_playwright():
-    with patch("core.networks.instagram.client.sync_playwright") as mock_sync:
+    with patch("core.browser_manager.BrowserManager.get_playwright") as mock_get:
         mock_p = MagicMock()
         mock_browser = MagicMock()
         mock_context = MagicMock()
         mock_page = MagicMock()
         
-        # Mock sync_playwright().start() returning the playwright instance
-        mock_sync.return_value.start.return_value = mock_p
+        # Mock BrowserManager.get_playwright() returning the playwright instance
+        mock_get.return_value = mock_p
         
         # Connect the chain
         mock_p.chromium.launch.return_value = mock_browser
