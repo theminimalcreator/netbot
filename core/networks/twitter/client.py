@@ -43,7 +43,7 @@ class TwitterClient(SocialNetworkClient):
             self.playwright = BrowserManager.get_playwright()
             
             self.browser = self.playwright.chromium.launch(
-                headless=False,
+                headless=settings.DEBUG_HEADLESS,
                 args=['--disable-blink-features=AutomationControlled']
             )
             
