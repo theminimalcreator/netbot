@@ -306,6 +306,7 @@ class ThreadsClient(SocialNetworkClient):
             logger.error(f"Error searching threads {query}: {e}")
             return []
 
+    def get_profile_data(self, username: str) -> Optional[SocialProfile]:
         """Fetches Threads profile data."""
         # Real implementation attempt
         if not self._is_logged_in:

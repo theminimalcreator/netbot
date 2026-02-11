@@ -268,14 +268,10 @@ class TwitterClient(SocialNetworkClient):
     
     def get_profile_data(self, username: str) -> Optional[SocialProfile]:
         """Fetches X profile data."""
-        # For now, minimal implementation returning username to satisfy interface
-        # In a real scenario, we would scrape bio/stats
-        return SocialProfile(
-            username=username,
-            platform=self.platform,
-            bio="Twitter Bio (Not scraped yet)",
-            recent_posts=[]
-        )
+        # For now, we don't have a reliable way to scrape bio without risking detection on X.
+        # Returning None prevents the ProfileAnalyzer from creating a dossier based on empty/fake data.
+        # In the future, we can implement extraction from the profile page if needed.
+        return None
 
     def get_user_latest_posts(self, username: str, limit: int = 5) -> List[SocialPost]:
         """Fetches latest posts from a user's profile."""
