@@ -28,8 +28,8 @@ graph TD
 
 ### Core Components:
 * **🧠 The Brain (`core/agent.py`):** Centralized AI powered by **Agno**. It evaluates posts using **Multimodal Intelligence** (Vision + Text) to decide if an action aligns with your persona.
-* **📚 Knowledge Base (`core/knowledge_base.py`):** A RAG engine using **pgvector** to retrieve your past interactions. This ensures the bot's opinions and tone evolve like a real "Digital Twin".
-* **🦾 Network Clients (`core/networks/`):** Implementation of the `BaseNetworkClient` interface. Currently supports Instagram via **Playwright**, simulating real browser behavior like scrolling and human-like typing.
+* **📚 Knowledge Base (`core/knowledge_base.py`):** A RAG engine using **pgvector** to retrieve your past interactions.
+* **🦾 Network Clients (`core/networks/`):** Implementation of the `BaseNetworkClient` interface. Currently supports **Instagram**, **Twitter**, **Threads**, and **Dev.to** via **Playwright**, simulating real browser behavior like scrolling and human-like typing.
 * **📊 Persistence (`core/database.py`):** Atomic logging and daily limit tracking via **Supabase** to ensure account safety and prevent rate-limit bans.
 
 ---
@@ -43,30 +43,33 @@ We currently use **GPT-4o-mini** for development and testing as it is the most c
 ---
 
 ## 🗺️ Roadmap: The Journey to a Digital Twin
+The project is structured in versions, steadily moving from a basic bot to a complete autonomous "Digital Twin".
 
-The project is structured in phases, moving from basic infrastructure to high-level social empathy and cross-platform authority.
-
-### 🟢 Phase 0: The Foundation (Completed)
-**Focus:** Infrastructure, Safety, and Vision.
-* **Modular Design:** Core structure defined to support multiple social clients.
+### ✅ V1: The Foundation & Social Intelligence (Completed)
+**Focus:** Infrastructure, Safety, Multimodal Vision, and Memory.
+* **Modular Architecture:** Support for multiple clients (`core/networks/`).
 * **Vision AI:** Agent capable of "seeing" images to generate context-aware responses.
-* **Discovery:** Hybrid strategy (VIP lists + Hashtags) successfully implemented.
+* **RAG Engine:** Semantic search integration for the agent to consult "How would I answer this?".
+* **Audience Awareness:** *Profile Scraper* + *Dossier Generator* to analyze an author's tone and background for personalized context injection.
+* **Multi-Platform:** Support for **Instagram**, **Twitter (X)**, and **Threads** (Text-Only Mode).
 
-### 🚧 Phase 1: The "Digital Twin" (Current Focus)
-**Focus:** Memory and Social Empathy.
-* **Knowledge Base (RAG):** Semantic search integration for the agent to consult "How would Guilherme answer this?".
-* **Audience Awareness:** Developing a *Profile Scraper* to analyze target bios and recent posts to generate a "Dossier" for personalized interaction.
-* **Text Expansion:** Initial support for **Threads** and **X (Twitter)**.
+### ✅ V1.5: The Specialist (Completed)
+**Focus:** Technical Authority.
+* **Dev.to Client:** Reading long-form technical articles and generating insightful comments.
+* **Deep Reading:** Enhanced RAG to process long texts.
 
-### 📅 Phase 2: The Specialist
-**Focus:** Long-form content and technical authority.
-* **Deep Reading:** Scaling RAG to process and discuss technical articles from **Dev.to** or **Medium**.
-* **Community Engagement:** Expanding the "Digital Twin" presence to platforms like **Reddit**.
+### 📅 V2: The Creator (Next Steps)
+**Focus:** Active content generation.
+* **Trend Watcher:** Monitoring Hacker News/GitHub Trending.
+* **Agente Autor:** Writing threads and technical articles.
 
-### 📅 Phase 3: The Creator & Enterprise
-**Focus:** Active content generation and B2B.
-* **Trend Watcher:** Monitoring GitHub Trending and Hacker News to initiate original discussions.
-* **LinkedIn Client:** Ultra-secure navigation focused on professional networking and lead triaging.
+### 📅 V3: Reddit
+**Focus:** Niche Community Engagement.
+* **Reddit Client:** Interaction in smaller subreddits.
+
+### 📅 V4: Enterprise
+**Focus:** B2B & Career.
+* **LinkedIn Client:** Ultra-secure navigation for professional networking.
 
 ---
 

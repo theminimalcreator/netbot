@@ -23,6 +23,8 @@ config/vip_list_threads.json
 config/vip_list_instagram.json
 config/hashtags_twitter.json
 config/vip_list_twitter.json
+config/hashtags_devto.json
+config/vip_list_devto.json
 
 # Logs
 *.log

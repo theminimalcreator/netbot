@@ -32,19 +32,19 @@
 ### 2. A Empatia (Audience Awareness) **[NOVO]**
 *Entender quem está do outro lado para adaptar o tom (Code Switching).*
 * **Funcionalidades:**
-    * [ ] **Profile Scraper:** Criar método no Playwright para extrair Bio + Últimos 10 Posts/Comentários do perfil alvo (VIP ou Descoberta).
-    * [ ] **Dossier Generator:** Usar LLM para analisar esses 10 posts e gerar um resumo JSON:
+    * [x] **Profile Scraper:** Criar método no Playwright para extrair Bio + Últimos 10 Posts/Comentários do perfil alvo (VIP ou Descoberta).
+    * [x] **Dossier Generator:** Usar LLM para analisar esses 10 posts e gerar um resumo JSON:
         * *Ex: "Perfil Técnico, valoriza Clean Code, tom sarcástico. Evite emojis excessivos."*
-    * [ ] **Context Injection:** Injetar esse "Dossier" no prompt do Agente para que a resposta seja personalizada para aquele interlocutor específico.
+    * [x] **Context Injection:** Injetar esse "Dossier" no prompt do Agente para que a resposta seja personalizada para aquele interlocutor específico.
 
 ### 3. O Corpo (Expansão de Texto)
 *Adaptação para redes onde a imagem é secundária.*
 * **Redes:** 🧵 **Threads** e ✖️ **X (Twitter)**.
 * **Funcionalidades:**
-    * [ ] **Refatoração:** Organizar estrutura de pastas para `core/networks/instagram`, `twitter`, etc.
-    * [ ] **Twitter Client:** Criar `core/networks/twitter` herdando da interface base.
-    * [ ] **Threads Client:** Criar `core/networks/threads`.
-    * [ ] **Text-Only Mode:** Calibrar o Agente para funcionar bem apenas com texto.
+    * [x] **Refatoração:** Organizar estrutura de pastas para `core/networks/instagram`, `twitter`, etc.
+    * [x] **Twitter Client:** Criar `core/networks/twitter` herdando da interface base.
+    * [x] **Threads Client:** Criar `core/networks/threads`.
+    * [x] **Text-Only Mode:** Calibrar o Agente para funcionar bem apenas com texto.
 
 ---
 
@@ -53,16 +53,15 @@
 
 * **Redes:** 💻 **Dev.to** e 🤖 **Reddit**.
 * **Funcionalidades:**
-    * [ ] **Dev.to Client:** Ler artigos técnicos e gerar comentários complementares.
-    * [ ] **Reddit Client:** "Karma Farming" em subs pequenos.
-    * [ ] **Deep Reading:** Melhorar o RAG para lidar com artigos longos.
+    * [x] **Dev.to Client:** Ler artigos técnicos e gerar comentários complementares.
+    * [x] **Deep Reading:** Melhorar o RAG para lidar com artigos longos.
 
 ---
 
 ## 📅 V2: O Criador (Content Machine)
 **Foco:** Deixar de reagir e começar a publicar (Agente Ativo).
 
-* **Redes:** Todas as anteriores + **Hashnode**.
+* **Redes:** Todas as anteriores.
 * **Funcionalidades:**
     * [ ] **Trend Watcher:** Monitorar Hacker News/GitHub Trending.
     * [ ] **Agente Autor:** Escrever threads e artigos técnicos.
@@ -70,7 +69,16 @@
 
 ---
 
-## 📅 V3: Enterprise (High Ticket)
+## 📅 V3: Reddit
+**Foco:** Interagir no Reddit.
+
+* **Redes:** Reddit.
+* **Funcionalidades:**
+    * [ ] **Reddit Client:** "Karma Farming" em subs pequenos.
+
+---
+
+## 📅 V4: Enterprise (High Ticket)
 **Foco:** Negócios e Carreira (B2B).
 
 * **Rede:** 👔 **LinkedIn**.
