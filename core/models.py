@@ -48,6 +48,16 @@ class SocialPost(BaseModel):
     comments: List[SocialComment] = Field(default_factory=list)
     raw_data: Dict[str, Any] = Field(default_factory=dict) # Original payload
 
+class SocialProfile(BaseModel):
+    username: str
+    platform: SocialPlatform
+    bio: Optional[str] = None
+    follower_count: Optional[int] = None
+    following_count: Optional[int] = None
+    post_count: Optional[int] = None
+    recent_posts: List[SocialPost] = Field(default_factory=list)
+    raw_data: Dict[str, Any] = Field(default_factory=dict)
+
 class ActionDecision(BaseModel):
     should_act: bool
     action_type: str = "comment" # comment, like, share

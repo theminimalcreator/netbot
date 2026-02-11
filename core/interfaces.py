@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import List, Optional, Dict, Any
-from core.models import SocialPost, SocialAuthor, ActionDecision, SocialPlatform
+from core.models import SocialPost, SocialAuthor, ActionDecision, SocialPlatform, SocialProfile
 
 class SocialNetworkClient(ABC):
     """
@@ -43,6 +43,10 @@ class SocialNetworkClient(ABC):
         
     def get_user_latest_posts(self, username: str, limit: int = 5) -> List[SocialPost]:
         return []
+
+    def get_profile_data(self, username: str) -> Optional['SocialProfile']:
+        """Fetches profile information (bio, stats) and recent posts."""
+        return None
 
 class DiscoveryStrategy(ABC):
     """

@@ -8,7 +8,7 @@ Uses a real browser for all Instagram operations:
 - Profile/hashtag browsing for discovery
 """
 from core.interfaces import SocialNetworkClient
-from core.models import SocialPost, SocialAuthor, SocialPlatform, SocialComment
+from core.models import SocialPost, SocialAuthor, SocialPlatform, SocialComment, SocialProfile
 from typing import Union
 import os
 import json
@@ -19,7 +19,8 @@ from pathlib import Path
 from typing import Optional, List, Dict, Any
 from urllib.parse import unquote
 
-from playwright.sync_api import sync_playwright, Browser, BrowserContext, Page, Playwright
+from playwright.sync_api import Browser, BrowserContext, Page, Playwright
+from core.browser_manager import BrowserManager
 
 from config.settings import settings
 
@@ -50,7 +51,7 @@ class InstagramClient(SocialNetworkClient):
     def start(self) -> bool:
         """Initialize browser and load session."""
         try:
-            self.playwright = sync_playwright().start()
+            self.playwright = BrowserManager.get_playwright()
             
             # Launch browser
             self.browser = self.playwright.chromium.launch(
@@ -125,7 +126,7 @@ class InstagramClient(SocialNetworkClient):
     def _interactive_login(self) -> bool:
         """Opens visible browser for user to login manually."""
         try:
-            self.playwright = sync_playwright().start()
+            self.playwright = BrowserManager.get_playwright()
             self.browser = self.playwright.chromium.launch(
                 headless=False,  # User needs to see this
                 args=['--disable-blink-features=AutomationControlled']
@@ -177,8 +178,6 @@ class InstagramClient(SocialNetworkClient):
                 pass
         if self.browser:
             self.browser.close()
-        if self.playwright:
-            self.playwright.stop()
         
         self.page = None
         self.context = None
@@ -503,6 +502,87 @@ class InstagramClient(SocialNetworkClient):
         raw_posts = self.get_user_latest_medias(username, amount=limit)
         return [self._map_to_social_post(p) for p in raw_posts if p]
 
+    def get_profile_data(self, username: str) -> Optional[SocialProfile]:
+        """Fetches profile information (bio, stats) and recent posts."""
+        if not self._is_logged_in:
+            logger.warning("Not logged in!")
+            return None
+            
+        try:
+            logger.info(f"Fetching profile data for @{username}...")
+            # We assume get_user_latest_medias handles the navigation, but it doesn't extract bio.
+            # So we navigate here explicitly or modify get_user_latest_medias.
+            # Let's navigate here to be safe and extract bio first.
+            self.page.goto(f'https://www.instagram.com/{username}/', timeout=30000)
+            self._random_delay(3, 5)
+            
+            # --- Extract Bio ---
+            bio = ""
+            # Structural selector: Header -> Section -> Div (last child usually) -> Span
+            try:
+                # Try finding the bio via text content if specific classes fail
+                # But let's try the stable structural approach first
+                # Header usually contains the profile info
+                header = self.page.query_selector('header')
+                if header:
+                    # The bio is often in a span within the last div of the section
+                    # Or we can look for the specific classes if they are semi-stable
+                    # Found in research: span._ap3a._aaco._aacu._aacx._aad7._aade
+                    bio_el = header.query_selector('span._ap3a._aaco._aacu._aacx._aad7._aade')
+                    if not bio_el:
+                         # Fallback: look for any span with substantial text that isn't the username
+                         spans = header.query_selector_all('span')
+                         for span in spans:
+                             text = span.inner_text()
+                             if len(text) > 10 and username not in text: # Heuristic
+                                 bio = text
+                                 break
+                    else:
+                        bio = bio_el.inner_text()
+            except Exception as e:
+                logger.warning(f"Failed to extract bio: {e}")
+            
+            logger.info(f"Extracted Bio: {bio[:50]}...")
+            
+            # --- Extract Stats (Optional) ---
+            follower_count = None
+            try:
+                # Stats are usually in an unordered list (ul) in the header
+                # Li: Posts, Followers, Following
+                # Selector: header ul li:nth-child(2)
+                stats_ul = self.page.query_selector('header ul')
+                if stats_ul:
+                    lis = stats_ul.query_selector_all('li')
+                    if len(lis) >= 2:
+                        followers_text = lis[1].inner_text() # e.g. "1.2M followers"
+                        # Simple cleanup: "1.2M followers" -> parse
+                        # For now just storing it might be complex, skipping exact number parsing
+                        pass
+            except:
+                pass
+
+            # --- Extract Recent Posts ---
+            # We can reuse get_user_latest_medias logic but we need to avoid re-navigating if possible
+            # However, get_user_latest_medias navigates to the profile again. 
+            # To avoid code duplication, we will just call it.
+            # It's slightly inefficient (double nav if we don't refactor) but Playwright caches content often.
+            # Actually, get_user_latest_medias does: page.goto -> extract hrefs -> page.goto(post)
+            # So calling it is fine.
+            
+            latest_posts_social = self.get_user_latest_posts(username, limit=10)
+            
+            return SocialProfile(
+                username=username,
+                platform=self.platform,
+                bio=bio,
+                recent_posts=latest_posts_social,
+                post_count=len(latest_posts_social) # Just what we fetched
+            )
+            
+        except Exception as e:
+            logger.error(f"Error fetching profile data for @{username}: {e}")
+            return None
+
     def search_posts(self, query: str, limit: int = 10) -> List[SocialPost]:
         """Searches for posts (hashtags)."""
         # Remove # if present
@@ -695,6 +775,4 @@ class InstagramClient(SocialNetworkClient):
             logger.error(f"Error posting comment on {media_id}: {e}")
             return False
 
-
-# Singleton instance
-client = InstagramClient()
+# Singleton removed — clients are now created per cycle in main.py
