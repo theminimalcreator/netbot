@@ -289,16 +289,33 @@ class TwitterClient(SocialNetworkClient):
 
             # 2. Type text
             self.page.click(editor_sel)
-            self.page.keyboard.type(text)
+            self.page.keyboard.type(text, delay=20) # Small delay to make it more realistic and trigger UI
             self._random_delay(1, 2)
 
             # 3. Click Send
             # The button testid is different depending on if it's inline or modal
-            send_btn = 'button[data-testid="tweetButtonInline"], button[data-testid="tweetButton"]'
-            self.page.click(send_btn)
+            send_btn_sel = 'button[data-testid="tweetButtonInline"], button[data-testid="tweetButton"]'
             
-            # 4. Success check
-            self.page.wait_for_timeout(3000)
+            # Wait for button to be enabled (not disabled and not aria-disabled)
+            try:
+                # We use a custom function to wait for the button to be enabled
+                self.page.wait_for_function(
+                    f"""() => {{
+                        const btn = document.querySelector('{send_btn_sel}');
+                        return btn && !btn.disabled && btn.getAttribute('aria-disabled') !== 'true';
+                    }}""",
+                    timeout=10000
+                )
+            except Exception as e:
+                logger.warning(f"[Twitter] Send button remained disabled (char limit?): {e}")
+                # Take a screenshot for debugging if possible (optional)
+                return None
+
+            self.page.click(send_btn_sel)
+            
+            # 4. Success check (wait for composer to close)
+            # Both inline and modal usually disappear or empty out
+            self.page.wait_for_selector(editor_sel, state="hidden", timeout=10000)
             logger.info("[Twitter] ✅ New tweet posted.")
             return "success"
 

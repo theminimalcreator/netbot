@@ -179,18 +179,31 @@ class ThreadsClient(SocialNetworkClient):
             # 2. Wait for the compose modal and type
             # The editor is usually a div with contenteditable or a specific testid
             editor_sel = 'div[role="textbox"], [data-testid="thread-composer-text-input"]'
-            self.page.wait_for_selector(editor_sel, timeout=5000)
+            self.page.wait_for_selector(editor_sel, timeout=10000)
             self.page.click(editor_sel)
-            self.page.keyboard.type(text)
+            self.page.keyboard.type(text, delay=20)
             self._random_delay(1, 2)
             
             # 3. Click "Post"
-            # It's usually a button with text "Post"
             post_btn_sel = 'div[role="button"]:has-text("Post"), button:has-text("Post")'
+            
+            # Wait for button to be enabled
+            try:
+                self.page.wait_for_function(
+                    f"""() => {{
+                        const btn = Array.from(document.querySelectorAll('div[role="button"], button')).find(b => b.innerText.includes("Post"));
+                        return btn && !btn.disabled && btn.getAttribute('aria-disabled') !== 'true';
+                    }}""",
+                    timeout=10000
+                )
+            except Exception as e:
+                logger.warning(f"[Threads] Post button remained disabled: {e}")
+                return None
+
             self.page.click(post_btn_sel)
             
             # 4. Success check
-            self.page.wait_for_timeout(4000)
+            self.page.wait_for_selector(editor_sel, state="hidden", timeout=10000)
             logger.info("[Threads] ✅ New thread posted.")
             return "success"
 
