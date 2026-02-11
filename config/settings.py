@@ -28,6 +28,8 @@ class Settings:
 
     # Bot Limits
     # Default Limits per platform
+    # Bot Limits
+    # Default Limits per platform
     DAILY_LIMITS = {
         "instagram": int(os.getenv("LIMIT_INSTAGRAM", "10")),
         "twitter": int(os.getenv("LIMIT_TWITTER", "30")),
@@ -35,6 +37,26 @@ class Settings:
         "linkedin": int(os.getenv("LIMIT_LINKEDIN", "30")),
         "devto": int(os.getenv("LIMIT_DEVTO", "5"))
     }
+    
+    # Step 3: Publishing Limits & Schedule
+    PUBLISHING_LIMITS = {
+        "twitter": 10,  # posts per day
+        "threads": 10   # posts per day
+    }
+    
+    # Dev.to specific schedule (Tue/Fri)
+    DEVTO_SCHEDULE = ["Tuesday", "Friday"]
+    
+    # General Constraints
+    BUSINESS_DAYS_ONLY = True
+    PROJECT_DAY = "Friday"
+    
+    # Content Mix (Probabilities for RNG)
+    CONTENT_MIX = {
+        "news": 0.7,
+        "insight": 0.3
+    }
+    
     # Legacy fallback (max across all if needed, but main.py will use specific)
     daily_interaction_limit = max(DAILY_LIMITS.values())
     min_sleep_interval = int(os.getenv("MIN_SLEEP_INTERVAL", "600")) # 10 minutes

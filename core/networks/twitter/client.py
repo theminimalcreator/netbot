@@ -265,7 +265,47 @@ class TwitterClient(SocialNetworkClient):
         except Exception as e:
             logger.error(f"Error replying to {post_id}: {e}")
             return False
-    
+
+    def post_content(self, text: str) -> Optional[str]:
+        """Posts a new tweet. Returns 'success' if posted."""
+        if not self.page or not self.context:
+             if not self.start():
+                 return None
+
+        try:
+            logger.info("[Twitter] Posting new content...")
+            self.page.goto("https://x.com/home", timeout=30000)
+            self._random_delay(2, 4)
+            
+            # 1. Click the "Post" button or find the compose area
+            editor_sel = 'div[data-testid="tweetTextarea_0"]'
+            
+            # On Home, usually there is an inline editor or we click the big "Post" button
+            if not self.page.is_visible(editor_sel):
+                post_btn = 'a[data-testid="SideNav_NewTweet_Button"]'
+                self.page.wait_for_selector(post_btn, timeout=5000)
+                self.page.click(post_btn)
+                self.page.wait_for_selector(editor_sel, timeout=5000)
+
+            # 2. Type text
+            self.page.click(editor_sel)
+            self.page.keyboard.type(text)
+            self._random_delay(1, 2)
+
+            # 3. Click Send
+            # The button testid is different depending on if it's inline or modal
+            send_btn = 'button[data-testid="tweetButtonInline"], button[data-testid="tweetButton"]'
+            self.page.click(send_btn)
+            
+            # 4. Success check
+            self.page.wait_for_timeout(3000)
+            logger.info("[Twitter] ✅ New tweet posted.")
+            return "success"
+
+        except Exception as e:
+            logger.error(f"[Twitter] Error posting new content: {e}")
+            return None
+
     def get_profile_data(self, username: str) -> Optional[SocialProfile]:
         """Fetches X profile data."""
         # For now, we don't have a reliable way to scrape bio without risking detection on X.

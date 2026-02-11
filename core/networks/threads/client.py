@@ -158,6 +158,45 @@ class ThreadsClient(SocialNetworkClient):
         """Replies to a post."""
         logger.warning("Threads post_comment not implemented")
         return False
+
+    def post_content(self, text: str) -> Optional[str]:
+        """Posts a new thread. Returns 'success' if posted."""
+        if not self.page or not self.context:
+             if not self.start():
+                 return None
+
+        try:
+            logger.info("[Threads] Posting new content...")
+            self.page.goto("https://www.threads.net/", timeout=30000)
+            self._random_delay(2, 4)
+            
+            # 1. Click "Create" button (usually the central + or the one in the top/bottom nav)
+            # The selector for the create button is often an SVG with aria-label="Create"
+            create_btn_sel = 'svg[aria-label="Create"], div[role="button"][aria-label="Create"]'
+            self.page.wait_for_selector(create_btn_sel, timeout=10000)
+            self.page.click(create_btn_sel)
+            
+            # 2. Wait for the compose modal and type
+            # The editor is usually a div with contenteditable or a specific testid
+            editor_sel = 'div[role="textbox"], [data-testid="thread-composer-text-input"]'
+            self.page.wait_for_selector(editor_sel, timeout=5000)
+            self.page.click(editor_sel)
+            self.page.keyboard.type(text)
+            self._random_delay(1, 2)
+            
+            # 3. Click "Post"
+            # It's usually a button with text "Post"
+            post_btn_sel = 'div[role="button"]:has-text("Post"), button:has-text("Post")'
+            self.page.click(post_btn_sel)
+            
+            # 4. Success check
+            self.page.wait_for_timeout(4000)
+            logger.info("[Threads] ✅ New thread posted.")
+            return "success"
+
+        except Exception as e:
+            logger.error(f"[Threads] Error posting new content: {e}")
+            return None
     
     def get_user_latest_posts(self, username: str, limit: int = 5) -> List[SocialPost]:
         """Fetches latest posts from a user's threads profile."""

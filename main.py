@@ -21,6 +21,7 @@ from core.browser_manager import BrowserManager
 
 # Networks
 from core.profile_analyzer import ProfileAnalyzer
+from core.editor_chef import EditorChef
 from core.networks.instagram.client import InstagramClient
 from core.networks.instagram.discovery import InstagramDiscovery
 from core.networks.twitter.client import TwitterClient
@@ -35,6 +36,7 @@ class AgentOrchestrator:
     def __init__(self):
         self.agent = SocialAgent()
         self.profile_analyzer = ProfileAnalyzer()
+        self.editor = EditorChef()
         self.running = True
 
         # Platform definitions (lazy — clients are created per cycle)
@@ -139,6 +141,12 @@ class AgentOrchestrator:
                 logger.error(f"[{name}] Failed to login. Skipping...")
                 client.stop()
                 continue
+
+            # NEW: Step 3 - Content Publication (Editor Chef)
+            try:
+                self.editor.transform_and_publish(client)
+            except Exception as e:
+                logger.error(f"[{name}] Editor Chef failed: {e}")
 
             # 3. Discovery
             discovery = cfg["discovery_class"](client)

@@ -267,7 +267,40 @@ class DevToClient(SocialNetworkClient):
             logger.error(f"[DevTo] Error commenting via browser: {e}")
             return False
 
+    def post_content(self, title: str, body: str, tags: List[str] = None) -> Optional[Dict]:
+        """Creates a new article on Dev.to using the API."""
+        if not self.api_key:
+            logger.error("[DevTo] No API Key for posting.")
+            return None
 
+        article_data = {
+            "article": {
+                "title": title,
+                "body_markdown": body,
+                "published": True,
+                "tags": tags or []
+            }
+        }
+
+        try:
+            logger.info(f"[DevTo] Posting new article: {title}")
+            response = requests.post(
+                f"{self.BASE_URL}/articles",
+                headers=self.headers,
+                json=article_data,
+                timeout=self.REQUEST_TIMEOUT
+            )
+            
+            if response.status_code in [200, 201]:
+                res_data = response.json()
+                logger.info(f"[DevTo] ✅ Article created: {res_data.get('url')}")
+                return res_data
+            else:
+                logger.error(f"[DevTo] Failed to post article: {response.status_code} - {response.text}")
+                return None
+        except Exception as e:
+            logger.error(f"[DevTo] Error posting article: {e}")
+            return None
 
     def search_posts(self, query: str, limit: int = 10) -> List[SocialPost]:
         """Searches articles by tag."""
