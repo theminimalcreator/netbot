@@ -183,7 +183,7 @@ class TwitterClient(SocialNetworkClient):
         try:
             url = f"https://x.com/i/status/{post_id}"
             if self.page.url != url:
-                self.page.goto(url)
+                self.page.goto(url, timeout=30000)
             
             # Like button usually has data-testid="like"
             # It might handle unliking too (check state)
@@ -225,7 +225,7 @@ class TwitterClient(SocialNetworkClient):
         try:
             url = f"https://x.com/i/status/{post_id}"
             if self.page.url != url:
-                self.page.goto(url)
+                self.page.goto(url, timeout=30000)
             
             # 1. Click Reply/Comment box
             # Usually strict: [data-testid="reply"] opens modal? 

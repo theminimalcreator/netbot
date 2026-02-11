@@ -26,7 +26,7 @@ class ThreadsClient(SocialNetworkClient):
         self.browser: Optional[Browser] = None
         self.context: Optional[BrowserContext] = None
         self.page: Optional[Page] = None
-        self.session_path = Path("browser_state")
+        self.session_path = settings.BASE_DIR / "browser_state"
         self._is_logged_in = False
     
     @property
@@ -262,11 +262,38 @@ class ThreadsClient(SocialNetworkClient):
                             if post_id in seen_ids: continue
                             seen_ids.add(post_id)
                             
+                            # Parse content and author
+                            # Strategy: finding the parent container of the link
+                            # The link usually wraps the time or is part of the post header/footer
+                            # We can try to find the closest common ancestor that looks like a post
+                            
+                            content = ""
+                            username = "unknown"
+                            
+                            # Attempt to find post text
+                            # Try to get text from the parent container
+                            try:
+                                # This is heuristics-based as Threads structure is complex
+                                parent = link.evaluate_handle('node => node.closest("div[data-pressable-container=true], div[role=button]") or node.parentElement.parentElement')
+                                if parent:
+                                     txt = parent.inner_text()
+                                     lines = txt.split('\n')
+                                     # Heuristic: User is usually top, content middle
+                                     if len(lines) > 1:
+                                         username = lines[0] # Very rough
+                                         content = "\n".join(lines[1:])
+                            except:
+                                pass
+                                
+                            # Fallback if content empty
+                            if not content:
+                                content = "Search Result (Content extraction failed)"
+
                             results.append(SocialPost(
                                 id=post_id,
                                 platform=self.platform,
-                                author=SocialAuthor(username="unknown", platform=self.platform),
-                                content="Search Result",
+                                author=SocialAuthor(username=username, platform=self.platform),
+                                content=content,
                                 url=f"https://www.threads.net{href}",
                                 media_type="text"
                             ))
@@ -279,12 +306,47 @@ class ThreadsClient(SocialNetworkClient):
             logger.error(f"Error searching threads {query}: {e}")
             return []
 
-    def get_profile_data(self, username: str) -> Optional[SocialProfile]:
         """Fetches Threads profile data."""
-        # Minimal implementation
-        return SocialProfile(
-            username=username,
-            platform=self.platform,
-            bio="Threads Bio",
-            recent_posts=[]
-        )
+        # Real implementation attempt
+        if not self._is_logged_in:
+            return None
+            
+        try:
+             url = f"https://www.threads.net/@{username}"
+             self.page.goto(url, timeout=30000)
+             self._random_delay(2, 3)
+             
+             # Check if profile exists
+             if "Page not found" in self.page.title():
+                 return None
+                 
+             # Try to extract bio
+             # Selector strategy: look for meta description or specific header elements
+             # Meta description often contains the bio
+             bio = ""
+             try:
+                 meta_desc = self.page.query_selector('meta[name="description"]')
+                 if meta_desc:
+                     content = meta_desc.get_attribute("content")
+                     # Format usually: "Name (@user) on Threads. Bio text..."
+                     if " on Threads." in content:
+                         bio = content.split(" on Threads.")[1].strip()
+                     else:
+                         bio = content
+             except:
+                 pass
+                 
+             # If we can't find even a username or bio, return None to avoid hallucination
+             if not bio:
+                 return None
+                 
+             return SocialProfile(
+                username=username,
+                platform=self.platform,
+                bio=bio,
+                recent_posts=[] # Populating this would require more scraping
+            )
+
+        except Exception as e:
+            logger.error(f"Error fetching profile {username}: {e}")
+            return None

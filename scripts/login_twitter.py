@@ -70,4 +70,6 @@ def setup_twitter_login():
     return True
 
 if __name__ == "__main__":
-    setup_twitter_login()
+    success = setup_twitter_login()
+    if not success:
+        sys.exit(1)

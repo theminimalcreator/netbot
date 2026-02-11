@@ -187,9 +187,6 @@ class AgentOrchestrator:
                                         "post_id": post.id,
                                         "platform": client.platform.value,
                                         "username": post.author.username,
-                                        "post_id": post.id,
-                                        "platform": client.platform.value,
-                                        "username": post.author.username,
                                         "created_at": datetime.now(timezone.utc).isoformat()
                                     },
                                     upsert=True
@@ -213,9 +210,6 @@ class AgentOrchestrator:
             if not interacted:
                 logger.info(f"[{name}] Finished candidates with no interaction.")
 
-            # 5. Close browser & Playwright for this platform
-            logger.info(f"[{name}] Closing browser...")
-            client.stop()
             # 5. Close browser & Playwright for this platform
             logger.info(f"[{name}] Closing browser...")
             client.stop()
