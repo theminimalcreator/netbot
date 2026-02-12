@@ -32,7 +32,7 @@ class SocialAgent:
         try:
             with open(persona_path, "r", encoding="utf-8") as f:
                 persona_content = f.read()
-            logger.info(f"✅ Persona loaded from {persona_path} ({len(persona_content)} chars)")
+            logger.debug(f"✅ Persona loaded from {persona_path} ({len(persona_content)} chars)")
             logger.debug(f"Persona Preview: {persona_content[:100]}...")
         except Exception as e:
             logger.error(f"❌ Failed to load persona from {persona_path}: {e}")

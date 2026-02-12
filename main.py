@@ -53,12 +53,12 @@ class AgentOrchestrator:
                 "client_class": TwitterClient,
                 "discovery_class": TwitterDiscovery,
             },
-            {
-                "name": "Threads",
-                "platform": "threads",
-                "client_class": ThreadsClient,
-                "discovery_class": ThreadsDiscovery,
-            },
+            # {
+            #     "name": "Threads",
+            #     "platform": "threads",
+            #     "client_class": ThreadsClient,
+            #     "discovery_class": ThreadsDiscovery,
+            # },
             {
                 "name": "Dev.to",
                 "platform": "devto",
@@ -112,11 +112,11 @@ class AgentOrchestrator:
         # 1. Content Curation & Personal Flow
         try:
             from scripts.fetch_news import NewsFetcher
-            logger.info("Checking for new news articles...")
+            logger.debug("Checking for new news articles...")
             NewsFetcher().fetch_and_process()
             
             from scripts.generate_project_updates import ProjectUpdateGenerator
-            logger.info("Checking for project updates...")
+            logger.debug("Checking for project updates...")
             ProjectUpdateGenerator().run()
         except Exception as e:
             logger.error(f"Error in content flows: {e}")
@@ -142,7 +142,7 @@ class AgentOrchestrator:
                 continue
 
             # 2. Start browser & login
-            logger.info(f"[{name}] Starting browser (Interaction={can_interact}, Pub={can_publish})...")
+            logger.debug(f"[{name}] Starting browser (Interaction={can_interact}, Pub={can_publish})...")
             client = cfg["client_class"]()
             if not client.login():
                 logger.error(f"[{name}] Failed to login. Skipping...")
@@ -163,7 +163,7 @@ class AgentOrchestrator:
                 continue
 
             discovery = cfg["discovery_class"](client)
-            logger.info(f"[{name}] Discovery started...")
+            logger.debug(f"[{name}] Discovery started...")
             candidates = discovery.find_candidates(limit=5)
 
             if not candidates:
@@ -175,13 +175,13 @@ class AgentOrchestrator:
             interacted = False
             for i, post in enumerate(candidates):
                 try:
-                    logger.info(f"[{name}] Analyzing Post {i+1}/{len(candidates)}: {post.id}")
+                    logger.debug(f"[{name}] Analyzing Post {i+1}/{len(candidates)}: {post.id}")
 
                     # --- Audience Awareness (Profile Analysis) ---
                     dossier = None
                     try:
                         if hasattr(client, 'get_profile_data') and callable(client.get_profile_data):
-                            logger.info(f"[{name}] gathering dossier for @{post.author.username}...")
+                            logger.debug(f"[{name}] gathering dossier for @{post.author.username}...")
                             profile_data = client.get_profile_data(post.author.username)
                             if profile_data:
                                 dossier = self.profile_analyzer.analyze_profile(profile_data)
@@ -224,7 +224,7 @@ class AgentOrchestrator:
                                     },
                                     upsert=True
                                 )
-                                logger.info(f"[{name}] 🧠 Interaction saved to memory (RAG).")
+                                logger.debug(f"[{name}] 🧠 Interaction saved to memory (RAG).")
                             except Exception as e:
                                 logger.error(f"[{name}] Failed to save to memory: {e}")
 
@@ -244,7 +244,7 @@ class AgentOrchestrator:
                 logger.info(f"[{name}] Finished candidates with no interaction.")
 
             # 5. Close browser & Playwright for this platform
-            logger.info(f"[{name}] Closing browser...")
+            logger.debug(f"[{name}] Closing browser...")
             client.stop()
 
     def stop(self, signum=None, frame=None):

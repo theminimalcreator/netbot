@@ -16,12 +16,7 @@ from core.database import db
 from agno.agent import Agent
 from agno.models.openai import OpenAIChat
 
-# Configure Logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger("NewsFetcher")
+from core.logger import logger
 
 class NewsFetcher:
     def __init__(self):
@@ -94,7 +89,7 @@ class NewsFetcher:
         for source in self.sources:
             url = source["url"]
             name = source["name"]
-            logger.info(f"Fetching {name} ({url})...")
+            logger.debug(f"Fetching {name} ({url})...")
             
             try:
                 feed = feedparser.parse(url)
@@ -114,7 +109,7 @@ class NewsFetcher:
                         continue
                     
                     # 2. AI Processing
-                    logger.info(f"Analyzing: {title}")
+                    logger.debug(f"Analyzing: {title}")
                     decision = self._analyze_content(title, snippet, name)
                     
                     if decision.get("approved"):
@@ -122,7 +117,7 @@ class NewsFetcher:
                         total_approved += 1
                         logger.info(f"✅ Approved: {title}")
                     else:
-                        logger.info(f"❌ Rejected: {decision.get('reasoning')}")
+                        logger.debug(f"❌ Rejected: {decision.get('reasoning')}")
                     
                     # Mark as processed regardless of approval? 
                     # Currently strict dedup only checks DB. If rejected, we don't save to DB 

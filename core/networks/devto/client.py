@@ -44,7 +44,7 @@ class DevToClient(SocialNetworkClient):
             response = requests.get(f"{self.BASE_URL}/users/me", headers=self.headers, timeout=self.REQUEST_TIMEOUT)
             if response.status_code == 200:
                 user_data = response.json()
-                logger.info(f"[DevTo] Authenticated as {user_data.get('username')}")
+                logger.debug(f"[DevTo] Authenticated as {user_data.get('username')}")
                 return True
             else:
                 logger.error(f"[DevTo] Authentication failed: {response.status_code} - {response.text}")
@@ -59,7 +59,7 @@ class DevToClient(SocialNetworkClient):
             return True
             
         try:
-            logger.info("[DevTo] Starting browser for interaction...")
+            logger.debug("[DevTo] Starting browser for interaction...")
             self.playwright = BrowserManager.get_playwright()
             
             self.browser = self.playwright.chromium.launch(
@@ -69,7 +69,7 @@ class DevToClient(SocialNetworkClient):
             
             state_file = self.session_path / "state_devto.json"
             if state_file.exists():
-                logger.info("[DevTo] Loading existing Dev.to session...")
+                logger.debug("[DevTo] Loading existing Dev.to session...")
                 self.context = self.browser.new_context(
                     storage_state=str(state_file),
                     viewport={'width': 1280, 'height': 800},

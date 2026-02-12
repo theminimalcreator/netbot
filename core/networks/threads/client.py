@@ -49,7 +49,7 @@ class ThreadsClient(SocialNetworkClient):
             
             state_file = self.session_path / "state_threads.json"
             if state_file.exists():
-                logger.info("Loading existing Threads session...")
+                logger.debug("Loading existing Threads session...")
                 self.context = self.browser.new_context(
                     storage_state=str(state_file),
                     viewport={'width': 1280, 'height': 800},
@@ -77,14 +77,14 @@ class ThreadsClient(SocialNetworkClient):
                 return False
         
         try:
-            logger.info("Checking Threads login status...")
+            logger.debug("Checking Threads login status...")
             self.page.goto('https://www.threads.net/', timeout=30000)
             self._random_delay(2, 4)
             
             try:
                 # Check for Home or Post button
                 self.page.wait_for_selector('svg[aria-label="Home"], a[href="/"] svg[aria-label="Home"]', timeout=5000)
-                logger.info("Threads: Already logged in!")
+                logger.debug("Threads: Already logged in!")
                 self._is_logged_in = True
                 return True
             except Exception as e:
@@ -176,7 +176,19 @@ class ThreadsClient(SocialNetworkClient):
             self.page.wait_for_selector(create_btn_sel, timeout=10000)
             self.page.click(create_btn_sel)
             
-            # 2. Wait for the compose modal and type
+            # 2. Interstitial: Handle "Sign up to post" modal
+            # Threads sometimes asks for re-authentication via Instagram
+            try:
+                # Button usually has text "Continue with Instagram" or specific aria-label
+                continue_btn_sel = 'div[role="button"]:has-text("Continue as"), div[role="button"]:has-text("Continue with Instagram")'
+                if self.page.is_visible(continue_btn_sel):
+                    logger.info("[Threads] 'Sign up to post' modal detected. Clicking continue...")
+                    self.page.click(continue_btn_sel)
+                    self._random_delay(1, 2)
+            except Exception as e:
+                logger.debug(f"[Threads] No re-auth modal found: {e}")
+
+            # 3. Wait for the compose modal and type
             # The editor is usually a div with contenteditable or a specific testid
             editor_sel = 'div[role="textbox"], [data-testid="thread-composer-text-input"]'
             self.page.wait_for_selector(editor_sel, timeout=10000)

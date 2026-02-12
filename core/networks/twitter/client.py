@@ -49,7 +49,7 @@ class TwitterClient(SocialNetworkClient):
             
             state_file = self.session_path / "state_twitter.json"
             if state_file.exists():
-                logger.info("Loading existing Twitter session...")
+                logger.debug("Loading existing Twitter session...")
                 self.context = self.browser.new_context(
                     storage_state=str(state_file),
                     viewport={'width': 1280, 'height': 800},
@@ -77,14 +77,14 @@ class TwitterClient(SocialNetworkClient):
                 return False
         
         try:
-            logger.info("Checking Twitter login status...")
+            logger.debug("Checking Twitter login status...")
             self.page.goto('https://x.com/home', timeout=30000)
             self._random_delay(2, 4)
             
             try:
                 # Check for Home or Post button
                 self.page.wait_for_selector('div[aria-label="Home"], a[aria-label="Home"]', timeout=5000)
-                logger.info("Twitter: Already logged in!")
+                logger.debug("Twitter: Already logged in!")
                 self._is_logged_in = True
                 return True
             except:
@@ -191,7 +191,7 @@ class TwitterClient(SocialNetworkClient):
             unlike_btn_sel = 'button[data-testid="unlike"]'
             
             if self.page.is_visible(unlike_btn_sel):
-                logger.info(f"Already liked tweet {post_id}")
+                logger.debug(f"Already liked tweet {post_id}")
                 return True
                 
             if self.page.is_visible(like_btn_sel):

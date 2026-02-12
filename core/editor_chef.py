@@ -12,7 +12,7 @@ from config.settings import settings
 from core.database import db
 from core.models import SocialPlatform
 
-logger = logging.getLogger("EditorChef")
+from core.logger import logger
 
 class SocialCopy(BaseModel):
     title: Optional[str] = Field(None, description="Title of the post, if applicable (e.g. for Dev.to).")
@@ -57,6 +57,7 @@ class EditorChef:
         - Body should be more descriptive and structured (Markdown).
         - Include code snippets if the source content mentions specific logic.
         - Professional but casual tone.
+        - Tags: Provide 1-4 plain text tags. Each tag MUST be a single word, alphanumeric, WITHOUT spaces or special characters (no '#').
         
         ## OUTPUT
         You MUST return a JSON matching the structured schema.
@@ -196,7 +197,16 @@ class EditorChef:
             
             if platform == "devto":
                 if hasattr(client, 'post_content'):
-                    res = client.post_content(title=copy.title, body=copy.body, tags=copy.tags)
+                    # Clean tags: alphanumeric, no spaces, lowercase
+                    clean_tags = []
+                    if copy.tags:
+                        import re
+                        for t in copy.tags:
+                            clean_t = re.sub(r'[^a-zA-Z0-9]', '', t.lower())
+                            if clean_t:
+                                clean_tags.append(clean_t[:20]) # Limit length
+                    
+                    res = client.post_content(title=copy.title, body=copy.body, tags=clean_tags)
                     if res:
                         success = True
                         post_id = res.get("id")

@@ -14,8 +14,7 @@ from core.database import db
 from agno.agent import Agent
 from agno.models.openai import OpenAIChat
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("ProjectUpdate")
+from core.logger import logger
 
 class ProjectUpdateGenerator:
     def __init__(self):
@@ -73,7 +72,7 @@ class ProjectUpdateGenerator:
 
     def run(self, force: bool = False):
         if not force and not self._should_generate():
-            logger.info("Project update already generated this week. Skipping.")
+            logger.debug("Project update already generated this week. Skipping.")
             return
 
         # Fetch projects from DB
