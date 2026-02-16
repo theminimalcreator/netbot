@@ -164,6 +164,11 @@ class EditorChef:
         if not self.can_publish(platform):
             return
 
+        # CHECK CAPABILITY: If client cannot post, skip immediately to save tokens and avoid loops
+        if platform != "devto" and not hasattr(client, 'post_content'):
+            logger.warning(f"[{platform}] Client does not support auto-publishing. Breaking loop.")
+            return
+
         idea = self.select_content(platform)
         if not idea:
             logger.info(f"[{platform}] No pending content ideas found.")

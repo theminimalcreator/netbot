@@ -50,12 +50,12 @@ class AgentOrchestrator:
                 "client_class": InstagramClient,
                 "discovery_class": InstagramDiscovery,
             },
-            # {
-            #     "name": "Twitter",
-            #     "platform": "twitter",
-            #     "client_class": TwitterClient,
-            #     "discovery_class": TwitterDiscovery,
-            # },
+            {
+                "name": "Twitter",
+                "platform": "twitter",
+                "client_class": TwitterClient,
+                "discovery_class": TwitterDiscovery,
+            },
             # {
             #     "name": "Threads",
             #     "platform": "threads",

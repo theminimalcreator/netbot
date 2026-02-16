@@ -92,6 +92,19 @@ class InstagramDiscovery(DiscoveryStrategy):
             logger.warning(f"Skipping {post.id}: Already interacted.", stage='B')
             return False
 
+        # Check if already discovered/processed (seen, rejected, error)
+        try:
+            res = db.client.table("discovered_posts").select("status").eq("external_id", post.id).eq("platform", post.platform.value).execute()
+            if res.data:
+                status = res.data[0]['status']
+                # If it was rejected or error, maybe we skip? Or retry?
+                # If it was 'seen' but not interacted, it means it's pending or was skipped for other reasons
+                if status in ['rejected', 'error', 'interacted']:
+                    logger.warning(f"Skipping {post.id}: Previously {status}.", stage='B')
+                    return False
+        except Exception as e:
+            logger.error(f"Error checking discovery status: {e}")
+
         # Ignore if it's our own post
         if post.author.username == settings.IG_USERNAME:
             return False
