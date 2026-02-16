@@ -16,7 +16,7 @@ from core.profile_analyzer import ProfileDossier
 class AgentOutput(BaseModel):
     should_comment: bool = Field(..., description="Set to True if we should comment, False to skip.")
     confidence_score: int = Field(..., description="0-100 score of how confident you are in this action.")
-    comment_text: str = Field(..., description="The comment text. MUST be in English. NO hashtags. Max 1 emoji. Avoid generic phrases.")
+    comment_text: str = Field(..., description="The comment text. If post is in Portuguese, use PT-BR. Otherwise, use English. NO hashtags. Max 1 emoji. Avoid generic phrases.")
     reasoning: str = Field(..., description="Brief reason for the decision and the chosen comment.")
 
 class SocialAgent:
@@ -138,6 +138,12 @@ class SocialAgent:
             - Author: @{post.author.username}
             - Content: "{post.content}"
             - Media Type: {post.media_type}
+
+            ## DONT COMMENT
+            - If the post is about finance, DO NOT comment.
+            - If the post is about politics, DO NOT comment.
+            - If the post is about religion, DO NOT comment.
+            - If the post is selling something, DO NOT comment.
             
             ## CONTEXT & SIGNALS
             - Engagement: {reply_count} replies, {like_count} likes.
@@ -148,7 +154,10 @@ class SocialAgent:
             {comments_context}
             {consistency_context}
             
+            {consistency_context}
+            
             Determine if I should comment. If yes, write the comment.
+            - PROMPT: Detect the language of the post. If it is Portuguese, REPLY IN PORTUGUESE (PT-BR). For any other language, REPLY IN ENGLISH.
             - Constraint: Max {char_limit}.
             - {style_guide}
             """

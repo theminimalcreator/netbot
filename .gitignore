@@ -45,3 +45,8 @@ storage/
 
 # Documentation
 docs/persona/persona.md
+
+# Debug artifacts
+debug_*.html
+debug_*.png
+debug_*.csv

@@ -33,6 +33,8 @@ from core.networks.threads.client import ThreadsClient
 from core.networks.threads.discovery import ThreadsDiscovery
 from core.networks.devto.client import DevToClient
 from core.networks.devto.discovery import DevToDiscovery
+from core.networks.linkedin.client import LinkedInClient
+from core.networks.linkedin.discovery import LinkedInDiscovery
 
 
 class AgentOrchestrator:
@@ -50,23 +52,30 @@ class AgentOrchestrator:
                 "client_class": InstagramClient,
                 "discovery_class": InstagramDiscovery,
             },
-            {
-                "name": "Twitter",
-                "platform": "twitter",
-                "client_class": TwitterClient,
-                "discovery_class": TwitterDiscovery,
-            },
+            # Twitter disabled (soft blocked)
             # {
-            #     "name": "Threads",
-            #     "platform": "threads",
-            #     "client_class": ThreadsClient,
-            #     "discovery_class": ThreadsDiscovery,
+            #     "name": "Twitter",
+            #     "platform": "twitter",
+            #     "client_class": TwitterClient,
+            #     "discovery_class": TwitterDiscovery,
             # },
+            {
+                "name": "Threads",
+                "platform": "threads",
+                "client_class": ThreadsClient,
+                "discovery_class": ThreadsDiscovery,
+            },
             {
                 "name": "Dev.to",
                 "platform": "devto",
                 "client_class": DevToClient,
                 "discovery_class": DevToDiscovery,
+            },
+            {
+                "name": "LinkedIn",
+                "platform": "linkedin",
+                "client_class": LinkedInClient,
+                "discovery_class": LinkedInDiscovery,
             },
         ]
 
@@ -113,16 +122,16 @@ class AgentOrchestrator:
         logger.info("--- Starting Cycle ---", status_code="SYSTEM")
 
         # 1. Content Curation & Personal Flow
-        try:
-            from scripts.fetch_news import NewsFetcher
-            logger.debug("Checking for new news articles...")
-            NewsFetcher().fetch_and_process()
+        # try:
+        #     # from scripts.fetch_news import NewsFetcher
+        #     # logger.debug("Checking for new news articles...")
+        #     # NewsFetcher().fetch_and_process()
             
-            from scripts.generate_project_updates import ProjectUpdateGenerator
-            logger.debug("Checking for project updates...")
-            ProjectUpdateGenerator().run()
-        except Exception as e:
-            logger.error(f"Error in content flows: {e}")
+        #     # from scripts.generate_project_updates import ProjectUpdateGenerator
+        #     # logger.debug("Checking for project updates...")
+        #     # ProjectUpdateGenerator().run()
+        # except Exception as e:
+        #     logger.error(f"Error in content flows: {e}")
 
         for cfg in self.platform_configs:
             name = cfg["name"]

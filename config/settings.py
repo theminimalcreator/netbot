@@ -34,6 +34,11 @@ class Settings:
     TWITTER_CLIENT_ID = os.getenv("TWITTER_CLIENT_ID")
     TWITTER_CLIENT_SECRET = os.getenv("TWITTER_CLIENT_SECRET")
 
+    # LinkedIn OAuth
+    LINKEDIN_CLIENT_ID = os.getenv("LINKEDIN_CLIENT_ID")
+    LINKEDIN_CLIENT_SECRET = os.getenv("LINKEDIN_CLIENT_SECRET")
+
+
     # Bot Limits
     # Default Limits per platform
     # Bot Limits
@@ -42,7 +47,7 @@ class Settings:
         "instagram": int(os.getenv("LIMIT_INSTAGRAM", "10")),
         "twitter": int(os.getenv("LIMIT_TWITTER", "30")),
         "threads": int(os.getenv("LIMIT_THREADS", "15")),
-        "linkedin": int(os.getenv("LIMIT_LINKEDIN", "30")),
+        "linkedin": int(os.getenv("LIMIT_LINKEDIN", "15")),
         "devto": int(os.getenv("LIMIT_DEVTO", "10"))
     }
     
@@ -73,7 +78,7 @@ class Settings:
     min_sleep_interval = int(os.getenv("MIN_SLEEP_INTERVAL", "600")) # 10 minutes
     max_sleep_interval = int(os.getenv("MAX_SLEEP_INTERVAL", "3000")) # 50 minutes
     dry_run = os.getenv("DRY_RUN", "True").lower() == "true"
-    discovery_limit = int(os.getenv("DISCOVERY_LIMIT", "20")) # Number of posts to analyze per cycle
+    discovery_limit = int(os.getenv("DISCOVERY_LIMIT", "30")) # Number of posts to analyze per cycle
     
     # Proxy (optional, helps avoid IP bans)
     PROXY_URL = os.getenv("PROXY_URL", None)
