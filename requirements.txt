@@ -16,3 +16,4 @@ sqlalchemy>=2.0.28
 feedparser>=6.0.10
 nest_asyncio>=1.6.0
 requests>=2.31.0
+tweepy>=4.15.0

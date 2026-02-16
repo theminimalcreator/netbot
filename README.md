@@ -12,23 +12,30 @@ This project is **Open Source** and serves as a laboratory for **Modular Agentic
 
 NetBot follows a **Modular & Event-Driven** design, strictly separating the "Brain" (AI Logic) from the "Body" (Platform Clients). This ensures the core intelligence remains agnostic to the social network being used.
 
-### Logic Flow
+### User-Mimicry Flow
 ```mermaid
 graph TD
-    A[Orchestrator] -->|Loop| B(Discovery Strategy)
-    B -->|Candidates| C{Agent Analysis}
-    C -->|Retrieve History| K[(Knowledge Base/RAG)]
-    K -->|Context| C
-    C -->|No| D[Skip]
-    C -->|Yes| E[Action Decision]
-    E -->|Execute| F[Social Network Client]
-    F -->|Log & Embed| G[(Supabase)]
-    G -->|Update Stats| A
+    subgraph "Core Logic"
+        Agent[SocialAgent]
+        RAG[(Knowledge Base)]
+        Profile[Profile Analyzer]
+        Editor[Editor Chef]
+    end
+
+    subgraph "Actions"
+        Disc[Discovery] --> Analysis
+        Analysis[Agent Decision] -->|Interact| Comment[Comment/Like]
+        Curate[News/Projects] --> Editor -->|Publish| Post[New Post]
+    end
+
+    Analysis <--> RAG
+    Analysis <--> Profile
 ```
 
 ### Core Components:
 * **🧠 The Brain (`core/agent.py`):** Centralized AI powered by **Agno**. It evaluates posts using **Multimodal Intelligence** (Vision + Text) to decide if an action aligns with your persona.
 * **📚 Knowledge Base (`core/knowledge_base.py`):** A RAG engine using **pgvector** to retrieve your past interactions.
+* **👨‍🍳 Editor Chef (`core/editor_chef.py`):** An autonomous content creator that transforms raw news and project updates into platform-native posts.
 * **🦾 Network Clients (`core/networks/`):** Implementation of the `BaseNetworkClient` interface. Currently supports **Instagram**, **Twitter**, **Threads**, and **Dev.to** via **Playwright**, simulating real browser behavior like scrolling and human-like typing.
 * **📊 Persistence (`core/database.py`):** Atomic logging and daily limit tracking via **Supabase** to ensure account safety and prevent rate-limit bans.
 
@@ -58,10 +65,11 @@ The project is structured in versions, steadily moving from a basic bot to a com
 * **Dev.to Client:** Reading long-form technical articles and generating insightful comments.
 * **Deep Reading:** Enhanced RAG to process long texts.
 
-### 📅 V2: The Creator (Next Steps)
+### ✅ V2: The Creator (Completed)
 **Focus:** Active content generation.
-* **Trend Watcher:** Monitoring Hacker News/GitHub Trending.
-* **Agente Autor:** Writing threads and technical articles.
+* **Trend Watcher:** Monitoring RSS feeds for relevant tech news (`scripts/fetch_news.py`).
+* **Agente Autor:** Generating updates about your personal projects (`scripts/generate_project_updates.py`).
+* **Editor Chef:** Transforming raw ideas into posts optimized for each platform.
 
 ### 📅 V3: Reddit
 **Focus:** Niche Community Engagement.

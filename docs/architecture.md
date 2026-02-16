@@ -1,104 +1,195 @@
-# 🤖 NetBot Architecture
+# NetBot System Architecture
 
-**Version:** 2.0 (Multi-Platform Support)  
-**Role:** Human Engagement Automation  
-**Stack:** Python, Playwright, Agno (Phidata), OpenAI GPT-4o-mini, Supabase.
+> [!NOTE]
+> This document reflects the current state of the NetBot system as of Feb 2026.
 
-## 1. Product Overview
+## 1. System Overview
 
-**NetBot** is an autonomous agent designed to interact on social media platforms (currently Instagram, with support for others) by simulating human behavior.
+NetBot is an omnichannel social media AI agent designed to act as an autonomous, high-quality engagement bot. It mimics a specific human persona, discovering relevant content across multiple platforms (Twitter, Instagram, Dev.to, Threads) and interacting with it intelligently using RAG (Retrieval-Augmented Generation) and LLMs.
 
-Unlike traditional bots, this system uses **Multimodal AI (Vision + Text)** to "see" the post/image and read the content, generating contextual comments indistinguishable from a human.
-
-### 🎯 Objectives (KPIs)
-*   **Daily Goal:** ~10 high-quality interactions (adjustable per platform).
-*   **Quality:** 0% generic comments (spam).
-*   **Safety:** Operates within limits using a real browser to avoid detection.
-
-## 2. System Architecture
-
-The architecture is **modular** and **event-driven**, separating the "Brain" (Agent) from the "Body" (Network Clients).
+## 2. Architecture Diagram
 
 ```mermaid
 graph TD
-    A[Orchestrator (Main)] -->|Loop| B(Discovery Strategy)
-    B -->|Candidates| C{Agent Analysis}
-    C -->|Retrieve History| K[(Knowledge Base)]
-    K -->|Context| C
-    C -->|No| D[Skip]
-    C -->|Yes| E[Action Decision]
-    E -->|Execute| F[Social Network Client]
-    F -->|Log & Embed| G[(Supabase)]
+    subgraph "Entry Points"
+        CLI[netbot.py (CLI)]
+        Main[main.py (Orchestrator)]
+    end
+
+    subgraph "Core Logic"
+        Agent[SocialAgent (Agno + GPT-4o)]
+        RAG[(Knowledge Base / PgVector)]
+        DB[(Supabase DB)]
+        Profile[Profile Analyzer]
+        Editor[Editor Chef]
+    end
+
+    subgraph "Network Layer"
+        IG[Instagram Client]
+        TW[Twitter Client]
+        TH[Threads Client]
+        DT[Dev.to Client]
+    end
+
+    Main -->|Loop| IG & TW & TH & DT
+    Main -->|Updates| CLI
+    
+    IG & TW & TH & DT -->|Fetch Posts| Agent
+    Agent <-->|Context| RAG
+    Agent -->|Decision| Main
+    Main -->|Action| IG & TW & TH & DT
+    Main -->|Log| DB
+    
+    classDef storage fill:#f9f,stroke:#333,stroke-width:2px;
+    class DB,RAG storage;
 ```
 
 ## 3. Core Components
 
-### 🧠 Core Layer (`core/`)
-*   **`agent.py`:** The centralized AI brain. Uses **Agno** and **GPT-4o** to analyze content and decide on actions. It is platform-agnostic.
-*   **`knowledge_base.py`:** Manages the **RAG (Retrieval-Augmented Generation)** system. Uses `pgvector` to store and retrieve past interactions, allowing the agent to learn from history.
-*   **`models.py`:** Unified data models (`SocialPost`, `SocialAuthor`, `ActionDecision`) that normalize data from different platforms into a common format.
-*   **`interfaces.py`:** Abstract Base Classes (ABCs) defining the contract for new networks:
-    *   `SocialNetworkClient`: Methods like `login()`, `like_post()`, `post_comment()`.
-    *   `DiscoveryStrategy`: Methods to find content (`find_candidates()`).
-*   **`database.py`:** Handles persistence to Supabase. Includes atomic operations via RPC (e.g., `increment_daily_stats`) to prevent race conditions during concurrent interactions.
+### 3.1 Orchestrator (`main.py`)
+The central nervous system. It runs an infinite loop (`run_cycle`) that:
+1.  **Checks Triggers**: Fetches news (`NewsFetcher`) and generates project updates (`ProjectUpdateGenerator`).
+2.  **Iterates Configured Platforms**: Processes enabled networks sequentially.
+3.  **Enforces Limits**: Checks daily interaction limits in Supabase before acting.
+4.  **Manages Resources**: Handles browser startup/shutdown via `BrowserManager`.
 
-### 🔌 Network Layer (`core/networks/`)
-Each platform is a self-contained module implementing the Core Interfaces.
+### 3.2 The "Brain" (`core/agent.py`)
+Encapsulated in `SocialAgent`.
+-   **Model**: GPT-4o-mini via `agno`.
+-   **Persona**: Loaded from `docs/persona/persona.md`.
+-   **Decision Making**: `decide_and_comment(post, dossier)` method analyzes content + context + image to output a structured `ActionDecision`.
+-   **Memory (RAG)**: Stores past interactions in `NetBotKnowledgeBase` (PgVector) to avoid repetition and maintain consistency.
 
-#### Instagram Module (`core/networks/instagram/`)
-*   **`client.py`:** Implements `SocialNetworkClient` using **Playwright**.
-    *   Handles Session Management (`browser_state/`).
-    *   Performs DOM-level interactions (clicks, typing).
-*   **`discovery.py`:** Implements `DiscoveryStrategy`.
-    *   Routes between **VIP List** (70%) and **Hashtags** (30%).
+### 3.3 Network Layer (`core/networks/`)
+Each platform (Twitter, Instagram, etc.) follows a standard pattern:
+-   **Client**: Handles low-level interaction (Login, Like, Comment, Post).
+    -   *Implementation*: Hybrid. Uses Playwright for browsing/posting (human-like) and APIs (Tweepy) where available/safe.
+-   **Discovery**: `DiscoveryStrategy` implementation.
+    -   *Logic*: Randomly selects between **VIP Lists** (monitoring specific users) and **Hashtags** (searching topics) defined in JSON configs.
 
-## 4. Workflows
+### 3.4 Data & State (`core/database.py`)
+-   **Supabase**: Primary persistent storage.
+    -   `interactions`: Logs of every comment/like.
+    -   `daily_stats`: Tracks usage limits.
+    -   `content_ideas`: Pool for generated content.
+-   **Local State**:
+    -   `browser_state/`: Stores browser cookies/sessions (JSON) to persist logins across restarts.
 
-### 🕵️ Discovery
-The `DiscoveryStrategy` selects posts to interact with.
-1.  **VIP Mode:** Checks profiles from `config/vip_list.json`.
-2.  **Discovery Mode:** Searches tags from `config/hashtags.json`.
-3.  **Filtering:** Ignores old posts, own posts, or already interacted posts.
+---
 
-### 👁️ Context & Analysis
-The `SocialNetworkClient` extracts:
-*   **Visuals:** Image URLs.
-*   **Text:** Caption, Author Name.
-*   **Context:** Recent comments (for sentiment/context).
+## 6. Detailed Process Flows
 
-### 🤖 Decision & Execution
-1.  **Agent** receives the standardized `SocialPost`.
-2.  **RAG Context:** Agent queries `NetBotKnowledgeBase` (pgvector) to find similar past interactions for tone consistency and memory.
-3.  **LLM** analyzes alignment with the Persona and provided context.
-4.  **Output:** Structured `ActionDecision` (ACT or SKIP).
-5.  **Client** executes the action (Like/Comment) using human-like delays (Jitter).
-6.  **Persistence:** Action is logged in `interactions` and daily counts are incremented atomically via RPC.
+### 6.1 Content Curation Flow
+**Goal**: Populate the `content_ideas` pool with high-quality, relevant data to be published later.
 
-## 5. Folder Structure
+```mermaid
+sequenceDiagram
+    participant S as Scheduler
+    participant NF as NewsFetcher
+    participant PG as ProjectGen
+    participant AI as AI Gatekeeper
+    participant DB as Supabase
 
-```plaintext
-/netbot
-│
-├── /config                 # Configuration (VIPs, Hashtags, Settings)
-├── /core
-│   ├── /networks           # Platform Implementations
-│   │   └── /instagram      # Instagram Module
-│   │       ├── client.py
-│   │       └── discovery.py
-│   ├── agent.py            # AI Logic
-│   ├── database.py         # Storage
-│   ├── interfaces.py       # Abstract Contracts
-│   ├── models.py           # Data Types
-│   └── logger.py           # Logging
-│
-├── main.py                 # Application Entry Point
-└── ...
+    S->>NF: Trigger fetch_news.py
+    NF->>NF: Load RSS Sources
+    loop Each Item
+        NF->>DB: Check Deduplication
+        alt New Item
+            NF->>AI: Analyze (Title + Snippet)
+            AI-->>NF: Decision (Approve/Reject + Summary)
+            alt Approved
+                NF->>DB: Insert into 'content_ideas' (status: pending)
+            end
+        end
+    end
+
+    S->>PG: Trigger generate_project_updates.py
+    PG->>DB: Check Last Update (< 7 days?)
+    alt Needed
+        PG->>DB: Fetch Active Projects
+        PG->>PG: Select Random Project
+        PG->>AI: Generate "No-Bullshit" Update
+        AI-->>PG: Content + Reasoning
+        PG->>DB: Insert into 'content_ideas' (status: pending)
+    end
 ```
 
-## 6. Safety & Limits
+### 6.2 Publication Flow (Editor Chef)
+**Goal**: Transform pending ideas into platform-native posts and publish them.
 
-| Risk | Mitigation |
-| :--- | :--- |
-| **Shadowban** | Strict daily limits per platform. |
-| **Detection** | Human-like delays (Jitter), real browser automation. |
-| **Logic** | Agent validates content safety before commenting. |
+```mermaid
+graph TD
+    Start[Cycle Start] --> CheckLimits{Can Publish Today?}
+    CheckLimits -- No --> End[Skip]
+    CheckLimits -- Yes --> Select{Select Content}
+    
+    Select -->|Project Day| GetProject[Fetch Project Update]
+    Select -->|Normal Day| GetNews[Fetch News/Insight]
+    
+    GetProject & GetNews --> HasContent{Found Idea?}
+    HasContent -- No --> End
+    HasContent -- Yes --> Transform[AI Transformation Agent]
+    
+    Transform -->|Input: Idea| AI
+    AI -->|Output: SocialCopy| Review
+    
+    subgraph AI Logic
+        direction TB
+        P[Persona]
+        Rules[Platform Rules]
+        Context[Source Content]
+        P & Rules & Context --> Gen[Generate Post]
+    end
+    
+    Review{Dry Run?}
+    Review -- Yes --> Log[Log to Console]
+    Review -- No --> Publish[Client.post_content()]
+    
+    Publish --> Success{Success?}
+    Success -- Yes --> DBUpdate[Update DB: status='published']
+    Success -- No --> Error[Log Error]
+```
+
+### 6.3 Discovery & Interaction Cycle
+**Goal**: Engage with the community by commenting on relevant posts.
+
+```mermaid
+sequenceDiagram
+    participant Main as Orchestrator
+    participant Disc as Discovery
+    participant Client as PlatformClient
+    participant Agent as SocialAgent
+    participant RAG as KnowledgeBase
+    participant DB as Supabase
+
+    Main->>Disc: find_candidates(limit=5)
+    Disc->>Disc: Select Strategy (VIP vs Hashtag)
+    Disc->>Client: Fetch Posts
+    Client-->>Disc: List[SocialPost]
+    Disc-->>Main: Candidates
+
+    loop Each Candidate
+        Main->>Client: get_profile_data() (Optional)
+        Client-->>Main: Dossier
+        
+        Main->>Agent: decide_and_comment(post, dossier)
+        
+        par Agent Internal
+            Agent->>RAG: Search similar past interactions
+            Agent->>Agent: Generate Comment (LLM)
+        end
+        
+        Agent-->>Main: ActionDecision (Act/Skip)
+        
+        alt Should Act
+            Main->>Client: Like Post
+            Main->>Client: Post Comment
+            Client-->>Main: Success
+            
+            par Memory
+                Main->>DB: Log Interaction
+                Main->>RAG: Insert Interaction (Learning)
+            end
+        end
+    end
+```

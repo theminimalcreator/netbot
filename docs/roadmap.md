@@ -58,14 +58,14 @@
 
 ---
 
-## 📅 V2: O Criador (Content Machine)
+## ✅ V2: O Criador (Content Machine)
 **Foco:** Deixar de reagir e começar a publicar (Agente Ativo).
 
 * **Redes:** Todas as anteriores.
 * **Funcionalidades:**
-    * [ ] **Trend Watcher:** Monitorar Hacker News/GitHub Trending.
-    * [ ] **Agente Autor:** Escrever threads e artigos técnicos.
-    * [ ] **Cross-Posting:** Adaptar conteúdo entre redes.
+    * [x] **Trend Watcher:** Monitorar RSS feeds de tecnologia (`scripts/fetch_news.py`).
+    * [x] **Agente Autor:** Gerar updates de projetos pessoais (`scripts/generate_project_updates.py`).
+    * [x] **Editor Chef:** Transformar ideias em posts nativos para cada rede (`core/editor_chef.py`).
 
 ---
 
