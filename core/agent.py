@@ -23,8 +23,8 @@ class SocialAgent:
     def __init__(self):
         self.prompts = settings.load_prompts()
         self.knowledge_base = NetBotKnowledgeBase()
-        self.agent = self._create_agent()
         self.logger = NetBotLoggerAdapter(logger, {'stage': 'C', 'status_code': 'BRAIN'})
+        self.agent = self._create_agent()
 
     def _create_agent(self) -> Agent:
         """Configures the Agno Agent with GPT-4o-mini."""
