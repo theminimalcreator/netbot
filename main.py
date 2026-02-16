@@ -122,16 +122,16 @@ class AgentOrchestrator:
         logger.info("--- Starting Cycle ---", status_code="SYSTEM")
 
         # 1. Content Curation & Personal Flow
-        # try:
-        #     # from scripts.fetch_news import NewsFetcher
-        #     # logger.debug("Checking for new news articles...")
-        #     # NewsFetcher().fetch_and_process()
+        try:
+            from scripts.fetch_news import NewsFetcher
+            logger.debug("Checking for new news articles...")
+            NewsFetcher().fetch_and_process()
             
-        #     # from scripts.generate_project_updates import ProjectUpdateGenerator
-        #     # logger.debug("Checking for project updates...")
-        #     # ProjectUpdateGenerator().run()
-        # except Exception as e:
-        #     logger.error(f"Error in content flows: {e}")
+            from scripts.generate_project_updates import ProjectUpdateGenerator
+            logger.debug("Checking for project updates...")
+            ProjectUpdateGenerator().run()
+        except Exception as e:
+            logger.error(f"Error in content flows: {e}")
 
         for cfg in self.platform_configs:
             name = cfg["name"]

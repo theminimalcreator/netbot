@@ -38,7 +38,6 @@ class Settings:
     LINKEDIN_CLIENT_ID = os.getenv("LINKEDIN_CLIENT_ID")
     LINKEDIN_CLIENT_SECRET = os.getenv("LINKEDIN_CLIENT_SECRET")
 
-
     # Bot Limits
     # Default Limits per platform
     # Bot Limits

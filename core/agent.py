@@ -153,8 +153,7 @@ class SocialAgent:
             {dossier_context}
             {comments_context}
             {consistency_context}
-            
-            {consistency_context}
+
             
             Determine if I should comment. If yes, write the comment.
             - PROMPT: Detect the language of the post. If it is Portuguese, REPLY IN PORTUGUESE (PT-BR). For any other language, REPLY IN ENGLISH.
