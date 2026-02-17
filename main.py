@@ -23,7 +23,7 @@ logger = NetBotLoggerAdapter(logging.getLogger("netbot"), {'status_code': 'SYSTE
 from core.browser_manager import BrowserManager
 
 # Networks
-from core.profile_analyzer import ProfileAnalyzer
+# ProfileAnalyzer is now managed internally by the agent's sequential chain
 from core.editor_chef import EditorChef
 from core.networks.instagram.client import InstagramClient
 from core.networks.instagram.discovery import InstagramDiscovery
@@ -40,7 +40,6 @@ from core.networks.linkedin.discovery import LinkedInDiscovery
 class AgentOrchestrator:
     def __init__(self):
         self.agent = SocialAgent()
-        self.profile_analyzer = ProfileAnalyzer()
         self.editor = EditorChef()
         self.running = True
 
@@ -190,19 +189,9 @@ class AgentOrchestrator:
                 try:
                     logger.debug(f"[{name}] Analyzing Post {i+1}/{len(candidates)}: {post.id}")
 
-                    # --- Audience Awareness (Profile Analysis) ---
-                    dossier = None
-                    try:
-                        if hasattr(client, 'get_profile_data') and callable(client.get_profile_data):
-                            logger.debug(f"[{name}] gathering dossier for @{post.author.username}...")
-                            profile_data = client.get_profile_data(post.author.username)
-                            if profile_data:
-                                dossier = self.profile_analyzer.analyze_profile(profile_data)
-                    except Exception as e:
-                        logger.warning(f"[{name}] Failed to generate dossier: {e}")
-
-                    # Agent Analysis
-                    decision = self.agent.decide_and_comment(post, dossier=dossier)
+                    # Agent Analysis (Sequential Chain: Judge → Context → Writer)
+                    # The agent's ContextBuilder handles dossier internally
+                    decision = self.agent.decide_and_comment(post, client=client)
 
                     if decision.should_act:
                         logger.info(f"[{name}] Decided to ACT (Conf: {decision.confidence_score}%): {decision.content}", stage='C', status_code='BRAIN')

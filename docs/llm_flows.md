@@ -7,26 +7,30 @@ All agents leverage **OpenAI's GPT-4o-mini** via the **Agno** framework. They sh
 
 ---
 
-## 1. Social Engagement Agent (`core/agent.py`)
-**Role**: The "Face" of the bot. It reads social media posts and decides whether to comment and what to say.
+## 1. Social Engagement Agent — Sequential Chain (`core/agent.py` + `core/chains/`)
+**Role**: The "Face" of the bot. Uses a 3-layer pipeline to efficiently filter, contextualize, and generate comments.
 
-### Flow
-1.  **Input**:
-    - **Post**: Content, Author, Media Type.
-    - **Context**: Existing comments (to avoid repetition or join conversations).
-    - **Dossier** (Optional): Psychological profile of the author (`ProfileDossier`).
-    - **RAG**: Similar past takes from the knowledge base (to ensure consistency).
-2.  **Logic**:
-    - Calculates engagement signal (Low/Medium/High) based on reply counts.
-    - Selects a strategy: "Hot Take" (kickstart) vs "Join Flow" (reply).
-    - Applies negative constraints (banned words/phrases).
-3.  **System Prompt**:
-    - Base Persona + "Senior Engineer answering with a hot take".
-    - strict rules: "OPINION OVER SOLUTION", "NO GENERIC PRAISE".
-4.  **Output**: `ActionDecision`
-    - `should_comment`: Boolean.
-    - `confidence_score`: 0-100.
-    - `content`: The generated comment.
+> For full architecture details with diagrams, see [Sequential Chain Architecture](sequential_chain.md).
+
+### Pipeline: Judge → Context Builder → Ghostwriter
+
+1.  **Layer 1 — The Judge** (`core/chains/judge.py`):
+    - Lightweight LLM call (~300 tokens). No persona loaded.
+    - Approves/rejects based on topic relevance.
+    - Outputs: `JudgeVerdict` (should_engage, category, language).
+
+2.  **Layer 2 — Context Builder** (`core/chains/context_builder.py`):
+    - **Pure Python** (no LLM cost). Only runs if Judge approved.
+    - Assembles: RAG, Profile Dossier, Engagement Signals, Comments, Style Guide.
+    - Outputs: `EngagementContext` (structured data for the Ghostwriter).
+
+3.  **Layer 3 — Ghostwriter** (`core/chains/ghostwriter.py`):
+    - Full persona LLM call (~1500 tokens). Only runs if Judge approved.
+    - Applies negative constraints, language matching, consistency checks.
+    - Outputs: `GhostwriterOutput` (comment_text, confidence_score, reasoning).
+
+4.  **Post-Processing**: Confidence filter (< 70% → skip).
+5.  **Final Output**: `ActionDecision` (should_act, content, confidence_score, reasoning).
 
 ---
 
