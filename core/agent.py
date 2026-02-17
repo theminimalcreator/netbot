@@ -177,6 +177,36 @@ class SocialAgent:
             response_obj = self.agent.run(user_input)
             response: AgentOutput = response_obj.content
             
+            # --- LLM LOGGING ---
+            # Extract basic metrics if available
+            metrics = getattr(response_obj, 'metrics', {})
+            token_usage = {
+                "input_tokens": metrics.get('input_tokens', 0),
+                "output_tokens": metrics.get('output_tokens', 0),
+                "total_cost": metrics.get('total_cost', 0.0)
+            }
+            
+            # Extract system prompt from agent instructions
+            system_prompt_log = self.agent.instructions if isinstance(self.agent.instructions, str) else "Dynamic Instructions"
+
+            # Log to DB
+            from core.database import db
+            db.log_llm_interaction(
+                provider="openai",
+                model="gpt-4o-mini",
+                system_prompt=system_prompt_log,
+                user_prompt=user_input,
+                response=response.model_dump_json(), # Store full JSON response
+                parameters={"temperature": 0.0}, # Agno default/configured
+                metrics=token_usage,
+                metadata={
+                    "post_id": post.id,
+                    "platform": post.platform.value,
+                    "author": post.author.username,
+                    "confidence": response.confidence_score
+                }
+            )
+
             # Log Token Usage if available
             if hasattr(response_obj, 'metrics') and response_obj.metrics:
                 self.logger.info(f"💰 Token Usage: {response_obj.metrics}", status_code='FINANCE')

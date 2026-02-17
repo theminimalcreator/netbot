@@ -113,5 +113,43 @@ class Database:
         except Exception as e:
             logger.error(f"Error updating discovery status {external_id}: {e}")
 
+    def log_llm_interaction(self, 
+                            provider: str, 
+                            model: str, 
+                            user_prompt: str, 
+                            response: str, 
+                            system_prompt: str = None, 
+                            parameters: dict = None, 
+                            metrics: dict = None, 
+                            metadata: dict = None) -> str:
+        """
+        Logs an LLM interaction to the llm_logs table.
+        """
+        try:
+            data = {
+                "provider": provider,
+                "model": model,
+                "user_prompt": user_prompt,
+                "response": response,
+                "system_prompt": system_prompt,
+                "parameters": parameters or {},
+                "created_at": datetime.now().isoformat(),
+                "metadata": metadata or {}
+            }
+
+            if metrics:
+                data["input_tokens"] = metrics.get('input_tokens')
+                data["output_tokens"] = metrics.get('output_tokens')
+                data["total_cost"] = metrics.get('total_cost')
+
+            res = self.client.table("llm_logs").insert(data).execute()
+            if res.data:
+                return res.data[0]["id"]
+            return None
+
+        except Exception as e:
+            logger.error(f"Error logging LLM interaction: {e}")
+            self.log_app_event("ERROR", "llm_logger", f"Failed to log LLM interaction: {e}")
+            return None
 
 db = Database()
