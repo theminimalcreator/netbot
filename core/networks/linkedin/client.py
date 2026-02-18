@@ -453,20 +453,21 @@ class LinkedInClient(SocialNetworkClient):
                     content = text_el.inner_text().strip()
             
             # 4. Metrics
-            metrics = {"likes": 0, "comments": 0}
+            likes = 0
+            comments = 0
             
             # Modern Likes: data-view-name="feed-reaction-count"
             likes_node = container.query_selector('[data-view-name="feed-reaction-count"]')
             if likes_node:
                 import re
                 nums = re.findall(r'\d+', likes_node.inner_text().replace(',', '').replace('.', ''))
-                if nums: metrics["likes"] = int(nums[0])
+                if nums: likes = int(nums[0])
             
             # Modern Comments: data-view-name="feed-comment-count"
             comments_node = container.query_selector('[data-view-name="feed-comment-count"]')
             if comments_node:
                 nums = re.findall(r'\d+', comments_node.inner_text().replace(',', '').replace('.', ''))
-                if nums: metrics["comments"] = int(nums[0])
+                if nums: comments = int(nums[0])
 
             if not content:
                 # Try article title as fallback
@@ -474,13 +475,13 @@ class LinkedInClient(SocialNetworkClient):
                 if article_title:
                     content = f"[Article] {article_title.inner_text()}"
             
-            # 4. Metrics
-            reactions = 0
-            react_el = container.query_selector('.social-details-social-counts__reactions-count')
-            if react_el:
-                 try:
-                     reactions = int(react_el.inner_text().strip().replace(',', '').replace('.', ''))
-                 except: pass
+            # Legacy reactions fallback
+            if likes == 0:
+                react_el = container.query_selector('.social-details-social-counts__reactions-count')
+                if react_el:
+                    try:
+                        likes = int(react_el.inner_text().strip().replace(',', '').replace('.', ''))
+                    except: pass
 
             return SocialPost(
                 id=post_id,
@@ -493,8 +494,10 @@ class LinkedInClient(SocialNetworkClient):
                 ),
                 content=content,
                 url=f"https://www.linkedin.com/feed/update/{urn}/",
-                metrics={"reaction_count": reactions},
-                media_type="text" # Mostly text/mixed
+                like_count=likes,
+                comment_count=comments,
+                metrics={"reaction_count": likes, "comment_count": comments},
+                media_type="text"
             )
 
         except Exception as e:
