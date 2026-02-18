@@ -5,6 +5,7 @@ Main entry point for the engagement bot.
 Orchestrates multiple social network clients and the central AI agent.
 Each platform runs sequentially: check limit → start → interact → close.
 """
+import argparse
 import time
 import random
 import signal
@@ -38,10 +39,12 @@ from core.networks.linkedin.discovery import LinkedInDiscovery
 
 
 class AgentOrchestrator:
-    def __init__(self):
+    def __init__(self, run_once=False):
         self.agent = SocialAgent()
         self.editor = EditorChef()
         self.running = True
+        self.run_once = run_once
+
 
         # Platform definitions (lazy — clients are created per cycle)
         self.platform_configs = [
@@ -104,6 +107,10 @@ class AgentOrchestrator:
         while self.running:
             try:
                 self.run_cycle()
+
+                if self.run_once:
+                    logger.info("Single cycle completed. Exiting.")
+                    break
 
                 # Sleep between cycles (after all platforms are done)
                 sleep_time = random.randint(settings.min_sleep_interval, settings.max_sleep_interval)
@@ -288,7 +295,11 @@ class AgentOrchestrator:
 
 
 if __name__ == "__main__":
-    orchestrator = AgentOrchestrator()
+    parser = argparse.ArgumentParser(description="NetBot Agent Orchestrator")
+    parser.add_argument("--once", action="store_true", help="Run a single cycle and exit")
+    args = parser.parse_args()
+
+    orchestrator = AgentOrchestrator(run_once=args.once)
 
     signal.signal(signal.SIGINT, orchestrator.stop)
     signal.signal(signal.SIGTERM, orchestrator.stop)

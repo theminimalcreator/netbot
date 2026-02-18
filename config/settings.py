@@ -16,6 +16,7 @@ class Settings:
 
     # API Keys
     OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+    ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
     IG_USERNAME = os.getenv("IG_USERNAME")
     IG_PASSWORD = os.getenv("IG_PASSWORD")
     SUPABASE_URL = os.getenv("SUPABASE_URL")
@@ -144,5 +145,8 @@ class Settings:
             with open(cls.PROMPTS_PATH, "r") as f:
                 return yaml.safe_load(f)
         return {}
+    
+    # LLM Models
+    LLM_MODEL_GHOSTWRITER = "claude-sonnet-4-5-20250929"
 
 settings = Settings()

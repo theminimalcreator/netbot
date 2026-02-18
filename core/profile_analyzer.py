@@ -14,18 +14,30 @@ class TechnicalLevel(str, Enum):
     NON_TECHNICAL = "Non-Technical"
 
 class ProfileDossier(BaseModel):
-    summary: str = Field(..., description="Brief summary of who this person is.")
+    summary: str = Field(..., description="Brief summary of the profile.")
     technical_level: TechnicalLevel = Field(...)
-    tone_preference: str = Field(..., description="Preferred tone (e.g., Casual, Formal, Sarcastic).")
-    interests: List[str] = Field(..., description="Key topics they post about.")
-    interaction_guidelines: str = Field(..., description="Specific advice on how to interact with them (e.g., 'Be concise', 'Use emojis', 'Cite sources').")
+    job_title: str = Field(..., description="Likely job role or position.")
+    is_hype_seller: bool = Field(..., description="True if the user sells 'hype' without substance.")
+    tone_preference: str = Field(..., description="Detected tone preference.")
+    interests: List[str] = Field(..., description="Main topics of interest.")
+    interaction_guidelines: str = Field(..., description="Specific tactical advice for Guilherme's response.")
 
 class ProfileAnalyzer:
     def __init__(self):
         self.agent = Agent(
             model=OpenAIChat(id="gpt-4o-mini"),
             description="Profile Analyst",
-            instructions="You are an expert social media analyst. Your goal is to analyze a user's profile (bio + posts) and create a deep psychological and professional dossier to guide future interactions.",
+            instructions="""You are the Profile Analyst for Guilherme Lorenz, a Senior Software Engineer and founder of Klotar Studio. 
+Your mission is to dissect social media profiles through Guilherme's eyes, focusing on technical pragmatism, product vision, and robustness.
+
+## GUILHERME'S IDENTITY CONTEXT:
+- 13 years in IT; Senior .NET/C# Expert; Rare hybrid of Product Design and Engineering.
+- Core Values: SOLID, Clean Architecture (when needed), Monoliths over unnecessary Microservices, Latency is UX.
+- Common Enemies: "Prompt Devs" (no logic), Showcase Complexity (overengineering), and "Hype Sellers".
+
+## YOUR GOAL:
+Analyze the provided bio and recent posts to create a professional and psychological dossier. 
+Determine if the user is a technical peer, a junior needing mentorship, or a "Hype Seller" (vendedor de fumaça).""",
             output_schema=ProfileDossier,
             markdown=True
         )
@@ -46,15 +58,25 @@ class ProfileAnalyzer:
             posts_block = "\n".join(posts_text)
             
             user_input = f"""
-            Analyze this user profile:
+            Analyze this user profile based on Guilherme Lorenz's standards:
+
             - Username: @{profile.username}
             - Bio: "{profile.bio or 'No bio'}"
-            - Follower Count: {profile.follower_count or 'Unknown'}
-            
-            Recent Posts:
+            - Followers: {profile.follower_count or 'Unknown'}
+
+            ## RECENT POSTS:
             {posts_block}
-            
-            Create a dossier that helps me (a senior software engineer bot) interact with them effectively.
+
+            ## ANALYSIS REQUIREMENTS:
+            1. DETECT "HYPE SELLERS": Flag as 'is_hype_seller' if they promote "get rich quick" tech schemes, grind culture without technical depth, or flashy tools without architectural substance.
+            2. JOB TITLE (LinkedIn Focus): Identify their likely professional role (e.g., CTO, Recruiter, Junior Dev, etc.).
+            3. TECHNICAL DEPTH: Evaluate if they understand the "why" or just repeat buzzwords.
+            4. INTERACTION STRATEGY: 
+               - If Junior: Be a pragmatic mentor (can use "garoteou" for basic mistakes).
+               - If Peer/Senior: Technical debate, peer-to-peer.
+               - If Hype Seller: Be acidic, ironic, and call out the "smoke".
+
+            Generate a dossier that enables Guilherme to engage with 7-8/10 intensity.
             """
             
             logger.info(f"Analyzing profile @{profile.username}...")
@@ -63,7 +85,8 @@ class ProfileAnalyzer:
             # Agno returns the Pydantic object directly in content if output_schema is set
             dossier: ProfileDossier = response_obj.content
             
-            logger.info(f"Dossier generated for @{profile.username}: {dossier.summary[:50]}...")
+            # Log full dossier for review (JSON format)
+            logger.info(f"Dossier generated for @{profile.username}:\n{dossier.model_dump_json(indent=2)}")
             return dossier
 
         except Exception as e:

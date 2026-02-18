@@ -148,8 +148,11 @@ class ContextBuilder:
         return context
 
     def _format_dossier(self, username: str, dossier: ProfileDossier) -> str:
+        hype_alert = "🚨 YES (HYPE SELLER DETECTED) 🚨" if dossier.is_hype_seller else "No"
         return f"""- Summary: {dossier.summary}
+- Job Title: {dossier.job_title}
 - Technical Level: {dossier.technical_level.value}
+- Hype Seller: {hype_alert}
 - Interests: {', '.join(dossier.interests)}
 - Tone Preference: {dossier.tone_preference}
 - INTERACTION GUIDELINES: {dossier.interaction_guidelines}

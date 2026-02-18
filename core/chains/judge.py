@@ -86,6 +86,28 @@ Should we engage with this post? Categorize it and detect the language."""
 
         self.logger.info(f"⚖️ Judging post {post.id} by @{post.author.username}...")
 
+        # HARD FILTER: Block Companies/Schools on LinkedIn
+        if post.platform.value == "linkedin":
+            is_company = False
+            # Check 1: Profile URL structure
+            if post.author.profile_url:
+                if "/company/" in post.author.profile_url or "/school/" in post.author.profile_url:
+                    is_company = True
+            
+            # Check 2: Username heuristic (posts/feed patterns often seen in company scrape)
+            # e.g. "google/posts" -> company
+            if post.author.username and "/posts" in post.author.username:
+                 is_company = True
+
+            if is_company:
+                self.logger.info(f"🚫 Hard Block: Company/Organization detected (@{post.author.username})")
+                return JudgeVerdict(
+                    should_engage=False,
+                    category=PostCategory.OTHER,
+                    language="en", 
+                    reasoning="Hard Block: Post is from a Company or School page (not a person)."
+                )
+
         try:
             response_obj = self.agent.run(prompt)
             verdict: JudgeVerdict = response_obj.content

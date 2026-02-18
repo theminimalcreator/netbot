@@ -906,30 +906,93 @@ class LinkedInClient(SocialNetworkClient):
             return False
             
     def get_profile_data(self, username: str) -> Optional[SocialProfile]:
-        """Scrapes detailed profile data."""
+        """Scrapes detailed profile data including recent posts."""
         if not self._is_logged_in: return None
         try:
-            url = f"https://www.linkedin.com/in/{username}/"
-            self.page.goto(url, timeout=30000)
-            self._random_delay(2,3)
+            profile_url = f"https://www.linkedin.com/in/{username}/"
+            logger.info(f"Fetching profile data for {username}...")
             
-            # Bio / Headline
+            self.page.goto(profile_url, timeout=30000)
+            self._random_delay(2, 3)
+            
+            # 1. Basic Info (Name, Headline, About)
+            name = username
             headline = ""
-            hl_el = self.page.query_selector('.text-body-medium')
-            if hl_el:
-                headline = hl_el.inner_text().strip()
-                
-            # About
             about = ""
-            about_el = self.page.query_selector('#about ~ .display-flex .inline-show-more-text')
-            if about_el:
-                 about = about_el.inner_text().strip()
             
+            try:
+                # Name
+                name_el = self.page.query_selector('h1.text-heading-xlarge, h1.text-heading-large')
+                if name_el:
+                    name = name_el.inner_text().strip()
+                
+                # Headline
+                hl_el = self.page.query_selector('.text-body-medium')
+                if hl_el:
+                    headline = hl_el.inner_text().strip()
+                
+                # About - Try to click "more" if present
+                try:
+                    about_section = self.page.query_selector('#about')
+                    if about_section:
+                        # The text is usually in a sibling div or inside a specific container
+                        # We look for the inline-show-more-text component relative to the #about anchor
+                        # Often it's in the next sibling's container
+                        about_container = self.page.evaluate_handle("""() => {
+                            const anchor = document.querySelector('#about');
+                            if (!anchor) return null;
+                            // The section content is usually 2 levels up then down into .display-flex
+                            const section = anchor.closest('section');
+                            if (!section) return null;
+                            return section.querySelector('.inline-show-more-text, .pv-shared-text-with-see-more');
+                        }""").as_element()
+                        
+                        if about_container:
+                            about = about_container.inner_text().strip()
+                except Exception as e:
+                    logger.debug(f"Error extracting About section: {e}")
+                    
+            except Exception as e:
+                logger.warning(f"Error scraping basic profile info: {e}")
+
+            full_bio = f"Name: {name}\nHeadline: {headline}\nAbout: {about}".strip()
+            
+            # 2. Recent Posts (Activity)
+            recent_posts = []
+            try:
+                activity_url = f"https://www.linkedin.com/in/{username}/recent-activity/all/"
+                logger.info(f"Fetching recent activity: {activity_url}")
+                self.page.goto(activity_url, timeout=30000)
+                self.page.wait_for_load_state("domcontentloaded")
+                self._random_delay(2, 4)
+                
+                # Scroll a bit
+                self.page.evaluate("window.scrollTo(0, document.body.scrollHeight / 2)")
+                self._random_delay(1, 2)
+                
+                # Reuse feed parser logic
+                # Activity feed items use similar structure to main feed
+                post_selector = '[data-view-name="feed-full-update"], li.profile-creator-shared-feed-update__container'
+                posts_handles = self.page.query_selector_all(post_selector)
+                
+                logger.info(f"Found {len(posts_handles)} activity items")
+                
+                for handle in posts_handles[:5]: # Last 5 posts
+                    post = self._parse_feed_post(handle)
+                    if post and post.content:
+                        recent_posts.append(post)
+                        
+            except Exception as e:
+                logger.error(f"Error fetching recent activity for {username}: {e}")
+
+            logger.info(f"Profile scraped: {name} | Posts: {len(recent_posts)}")
+
             return SocialProfile(
                 username=username,
                 platform=SocialPlatform.LINKEDIN,
-                bio=headline + "\n" + about,
-                profile_url=url
+                bio=full_bio,
+                profile_url=profile_url,
+                recent_posts=recent_posts
             )
         except Exception as e:
             logger.error(f"Error fetching profile {username}: {e}")
