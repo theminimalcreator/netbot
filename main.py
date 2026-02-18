@@ -182,7 +182,11 @@ class AgentOrchestrator:
 
             discovery = cfg["discovery_class"](client)
             logger.debug(f"[{name}] Discovery started...")
-            limit = settings.discovery_limit
+            
+            # Use platform-specific limit or fallback to global
+            limit = settings.DISCOVERY_LIMITS.get(platform_value, settings.discovery_limit)
+            logger.info(f"[{name}] Fetching up to {limit} posts for analysis...")
+            
             candidates = discovery.find_candidates(limit=limit)
 
             if not candidates:

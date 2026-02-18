@@ -44,11 +44,11 @@ class Settings:
     # Bot Limits
     # Default Limits per platform
     DAILY_LIMITS = {
-        "instagram": int(os.getenv("LIMIT_INSTAGRAM", "15")),
-        "twitter": int(os.getenv("LIMIT_TWITTER", "35")),
-        "threads": int(os.getenv("LIMIT_THREADS", "20")),
-        "linkedin": int(os.getenv("LIMIT_LINKEDIN", "20")),
-        "devto": int(os.getenv("LIMIT_DEVTO", "15"))
+        "instagram": int(os.getenv("LIMIT_INSTAGRAM", "10")),
+        "twitter": int(os.getenv("LIMIT_TWITTER", "20")),
+        "threads": int(os.getenv("LIMIT_THREADS", "10")),
+        "linkedin": int(os.getenv("LIMIT_LINKEDIN", "10")),
+        "devto": int(os.getenv("LIMIT_DEVTO", "5"))
     }
     
     # Step 3: Publishing Limits & Schedule
@@ -78,7 +78,16 @@ class Settings:
     min_sleep_interval = int(os.getenv("MIN_SLEEP_INTERVAL", "600")) # 10 minutes
     max_sleep_interval = int(os.getenv("MAX_SLEEP_INTERVAL", "3000")) # 50 minutes
     dry_run = os.getenv("DRY_RUN", "True").lower() == "true"
-    discovery_limit = int(os.getenv("DISCOVERY_LIMIT", "30")) # Number of posts to analyze per cycle
+    discovery_limit = int(os.getenv("DISCOVERY_LIMIT", "30")) # Global limit (fallback)
+
+    # Discovery Limits per platform (How many posts to analyze per cycle)
+    DISCOVERY_LIMITS = {
+        "instagram": int(os.getenv("DISCOVERY_LIMIT_INSTAGRAM", "20")),
+        "twitter": int(os.getenv("DISCOVERY_LIMIT_TWITTER", "30")),
+        "threads": int(os.getenv("DISCOVERY_LIMIT_THREADS", "20")),
+        "linkedin": int(os.getenv("DISCOVERY_LIMIT_LINKEDIN", "30")),
+        "devto": int(os.getenv("DISCOVERY_LIMIT_DEVTO", "15"))
+    }
     
     # Proxy (optional, helps avoid IP bans)
     PROXY_URL = os.getenv("PROXY_URL", None)
