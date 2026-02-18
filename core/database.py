@@ -152,4 +152,77 @@ class Database:
             self.log_app_event("ERROR", "llm_logger", f"Failed to log LLM interaction: {e}")
             return None
 
+    def get_count(self, table: str, filters: dict) -> int:
+        """
+        Generic count with improved filtering for dashboards.
+        Supports 'GTE:' prefix for date comparisons.
+        """
+        try:
+            query = self.client.table(table).select("id", count="exact")
+            
+            for key, value in filters.items():
+                if isinstance(value, list):
+                    # In query
+                    query = query.in_(key, value)
+                elif isinstance(value, str) and value.startswith("GTE:"):
+                    # Greater than or equal to date
+                    clean_val = value.replace("GTE:", "")
+                    query = query.gte(key, clean_val)
+                else:
+                    # Generic equals
+                    query = query.eq(key, value)
+            
+            res = query.execute()
+            return res.count if res.count is not None else 0
+        except Exception as e:
+            logger.error(f"Error counting {table}: {e}")
+            return 0
+
+    def get_recent_interactions(self, limit: int = 5) -> list:
+        """
+        Fetches the most recent interactions for the dashboard.
+        """
+        try:
+            res = self.client.table("interactions").select("*").order("created_at", desc=True).limit(limit).execute()
+            return res.data
+        except Exception as e:
+            logger.error(f"Error fetching recent interactions: {e}")
+            return []
+
+    def get_interactions_since(self, timestamp: datetime) -> list:
+        """
+        Fetches all interactions created after the given timestamp.
+        """
+        try:
+            res = self.client.table("interactions").select("*").gte("created_at", timestamp.isoformat()).order("created_at", desc=True).execute()
+            return res.data
+        except Exception as e:
+            logger.error(f"Error fetching interactions since {timestamp}: {e}")
+            return []
+
+    def get_token_usage_since(self, timestamp: datetime) -> dict:
+        """
+        Aggregates token usage and cost since the given timestamp.
+        Returns {'input_tokens': int, 'output_tokens': int, 'total_cost': float}
+        """
+        try:
+            # Supabase/Postgrest doesn't support sum() aggregation directly in simple client easily without RPC
+            # But the client wrapper might not expose it. 
+            # We can fetch selected columns and sum in python if the volume isn't huge (cycle logs usually small < 50 items).
+            res = self.client.table("llm_logs") \
+                .select("input_tokens,output_tokens,total_cost") \
+                .gte("created_at", timestamp.isoformat()) \
+                .execute()
+            
+            data = res.data or []
+            return {
+                "input_tokens": sum(item.get('input_tokens') or 0 for item in data),
+                "output_tokens": sum(item.get('output_tokens') or 0 for item in data),
+                "total_cost": sum(item.get('total_cost') or 0.0 for item in data)
+            }
+        except Exception as e:
+            logger.error(f"Error fetching token usage: {e}")
+            return {"input_tokens": 0, "output_tokens": 0, "total_cost": 0.0}
+
 db = Database()
+

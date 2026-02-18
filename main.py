@@ -108,14 +108,32 @@ class AgentOrchestrator:
             try:
                 self.run_cycle()
 
+                # Sleep between cycles (after all platforms are done)
+                # sleep_time is already calculated inside run_cycle but we need it here?
+                # Actually run_cycle creates it locally. We should probably move sleep out of run_cycle 
+                # or have run_cycle return it.
+                # For minimal refactor, let's just calculate it again or rely on run_cycle to wait?
+                # Original code waited HERE in the loop.
+                # Let's start a fresh random wait here to be safe and consistent with the outer loop,
+                # OR we accept that the dashboard prediction might be slightly off if we re-roll.
+                # BETTER: Move loop control logic into run_cycle? No.
+                
+                # To be accurate, we should probably return the sleep time from run_cycle.
+                # Let's refactor run_cycle to return the planned sleep time.
+                
+                wait_time = self.run_cycle()
+                
                 if self.run_once:
                     logger.info("Single cycle completed. Exiting.")
                     break
 
-                # Sleep between cycles (after all platforms are done)
-                sleep_time = random.randint(settings.min_sleep_interval, settings.max_sleep_interval)
-                logger.info(f"Cycle finished. Sleeping {sleep_time}s before next cycle...")
-                time.sleep(sleep_time)
+                if wait_time:
+                     logger.info(f"Cycle finished. Sleeping {wait_time}s before next cycle...")
+                     time.sleep(wait_time)
+                else: 
+                     # Fallback if run_cycle didn't return (e.g. exception or logic change)
+                     fallback = random.randint(settings.min_sleep_interval, settings.max_sleep_interval)
+                     time.sleep(fallback)
 
             except KeyboardInterrupt:
                 self.stop()
@@ -125,7 +143,8 @@ class AgentOrchestrator:
 
     def run_cycle(self):
         """Single execution cycle — runs each platform sequentially."""
-        logger.info("--- Starting Cycle ---", status_code="SYSTEM")
+        cycle_start_time = datetime.now()
+        logger.info(f"--- Starting Cycle at {cycle_start_time.strftime('%H:%M:%S')} ---", status_code="SYSTEM")
 
         # 1. Content Curation & Personal Flow
         try:
@@ -289,6 +308,40 @@ class AgentOrchestrator:
             # 5. Close browser & Playwright for this platform
             logger.debug(f"[{name}] Closing browser...")
             client.stop()
+
+        # --- END OF PLATFORM LOOP ---
+        
+        # 7. Generate and Send Dashboard
+        try:
+            from core.dashboard import DashboardGenerator
+            from core.notifications import TelegramNotifier
+            
+            # Determine sleep time early to include in dashboard
+            sleep_time = random.randint(settings.min_sleep_interval, settings.max_sleep_interval)
+            
+            logger.info("📊 Generating End-of-Cycle Dashboard...", status_code="SYSTEM")
+            generator = DashboardGenerator(cycle_start_time=cycle_start_time)
+            metrics = generator.gather_metrics()
+            metrics["next_cycle_wait"] = sleep_time
+            
+            report = generator.format_report(metrics)
+            
+            # Send to Telegram
+            notifier = TelegramNotifier()
+            msg_id = notifier.send_message(report)
+            
+            # Save to DB
+            generator.save(metrics, report, msg_id)
+            logger.info("✅ Dashboard saved and notification sent (if configured).")
+
+            logger.info("✅ Dashboard saved and notification sent (if configured).")
+            
+            return sleep_time
+
+        except Exception as e:
+            logger.error(f"Failed to generate/send dashboard: {e}")
+            return settings.min_sleep_interval # Fallback
+
 
     def stop(self, signum=None, frame=None):
         """Cleanup."""

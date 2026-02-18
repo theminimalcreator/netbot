@@ -74,6 +74,7 @@ class Ghostwriter:
         - Use natural dev slang: "treta", "no gargalo", "vendeu fumaça".
         - Use "garoteou" specifically for rookie mistakes (conceptual errors).
         - Tone: "Twitter Tech BR" style (sarcastic but knowledgeable).
+        - Don't use "---" in the comment.
         - **Prohibited Words:** Mindset, Disruptive, Synergy (as per persona blacklist).
 
         **IF DETECTED LANGUAGE IS ENGLISH:**

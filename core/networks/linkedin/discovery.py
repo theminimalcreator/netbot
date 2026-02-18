@@ -76,6 +76,10 @@ class LinkedInDiscovery(DiscoveryStrategy):
 
         # Log discovery
         metrics = getattr(post, 'metrics', {})
+        # Ensure URL is saved for dashboard
+        if getattr(post, 'url', None):
+            metrics['url'] = post.url
+            
         try:
             db.log_discovery(post.id, post.platform.value, "discovery", metrics)
         except Exception as e:

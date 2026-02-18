@@ -57,7 +57,12 @@ class DevToDiscovery(DiscoveryStrategy):
             return False
             
         # 1. Stage A: Collector - Log everything as 'seen'
+        # 1. Stage A: Collector - Log everything as 'seen'
         metrics = getattr(post, 'metrics', {})
+        # Ensure URL is saved
+        if getattr(post, 'url', None):
+            metrics['url'] = post.url
+            
         db.log_discovery(post.id, post.platform.value, "discovery", metrics)
         
         # 2. Stage B: Marketing Filter (Contextual)
