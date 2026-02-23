@@ -33,11 +33,13 @@ graph TD
 ```
 
 ### Core Components:
-* **🧠 The Brain (`core/agent.py`):** Centralized AI powered by **Agno**. It evaluates posts using **Multimodal Intelligence** (Vision + Text) to decide if an action aligns with your persona.
-* **📚 Knowledge Base (`core/knowledge_base.py`):** A RAG engine using **pgvector** to retrieve your past interactions.
-* **👨‍🍳 Editor Chef (`core/editor_chef.py`):** An autonomous content creator that transforms raw news and project updates into platform-native posts.
-* **🦾 Network Clients (`core/networks/`):** Implementation of the `BaseNetworkClient` interface. Currently supports **Instagram**, **Twitter**, **Threads**, and **Dev.to** via **Playwright**, simulating real browser behavior like scrolling and human-like typing.
-* **📊 Persistence (`core/database.py`):** Atomic logging and daily limit tracking via **Supabase** to ensure account safety and prevent rate-limit bans.
+* **🧠 The Brain (`core/agent.py`):** Centralized AI powered by **Agno** for reacting and parsing interactions.
+* **🌊 Content Cascade (`scripts/content_orchestrator.py`):** The V2 core engine. A sequential multi-agent pipeline:
+  * *Strategists*: `StrategicRoadmapper`, `WeeklyTactician`, `DailyBriefingAgent`
+  * *Makers*: `VisualDesigner`, `SlideContentGenerator`, `Copywriter`
+* **🎨 Rendering Engine (`core/cascade/renderer.py`):** Custom `Pillow` implementation to dynamically generate beautiful, brand-aligned Instagram Carousels.
+* **🦾 Network Clients (`core/publishers/` & `core/networks/`):** Implementation of publication and discovery. V2 uses **Playwright** (`PlaywrightInstagramPublisher`) to simulate real human browser behavior to bypass API constraints.
+* **📊 Persistence (`core/database.py`):** Supabase integration for logging, tracking content queues, managing storage buckets, and Telegram approvals.
 
 ---
 
@@ -65,14 +67,16 @@ The project is structured in versions, steadily moving from a basic bot to a com
 * **Dev.to Client:** Reading long-form technical articles and generating insightful comments.
 * **Deep Reading:** Enhanced RAG to process long texts.
 
-### ✅ V2: The Creator (Completed)
-**Focus:** Active content generation.
-* **Trend Watcher:** Monitoring RSS feeds for relevant tech news (`scripts/fetch_news.py`).
-* **Agente Autor:** Generating updates about your personal projects (`scripts/generate_project_updates.py`).
-* **Editor Chef:** Transforming raw ideas into posts optimized for each platform.
+### ✅ V2: The Creator & Content Cascade (Completed)
+**Focus:** Active content generation and autonomous publishing.
+* **The Strategists:** Monthly and Weekly planning AI.
+* **The Makers:** Daily execution AI (Designers, Copywriters).
+* **Automated Rendering:** Generating visual assets via Pillow.
+* **Approval Flow:** Human-in-the-loop Telegram integration.
+* **Playwright Publishing:** Seamless, headless UI automation for Instagram.
 
 ### 📅 V3: Reddit
-**Focus:** Niche Community Engagement.
+**Focus:** Niche Community Engagement & Karma Farming.
 * **Reddit Client:** Interaction in smaller subreddits.
 
 ### 📅 V4: Enterprise

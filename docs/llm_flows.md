@@ -108,3 +108,27 @@ All agents leverage **OpenAI's GPT-4o-mini** via the **Agno** framework. They sh
     - `title`: Punchy title.
     - `content`: 150-300 char update.
     - `reasoning`: Why this is engaging.
+
+---
+
+## 6. Content Cascade (V2 Autopilot)
+**Role**: The Full-Stack Editorial Agency. A sequential cascade of highly specialized agents that plan, design, and write complete social media campaigns (e.g., Instagram Carousels).
+
+### Flow 1: The Strategists (`core/cascade/strategists.py`)
+1. **Strategic Roadmapper**: 
+   - Takes the current Month/Year. Outputs a JSON Array of 3 High-Level "Monthly Themes".
+2. **Weekly Tactician**: 
+   - Takes a chosen Monthly Theme. Outputs a JSON Array of 4 "Weekly Topics", ensuring chronological progression.
+3. **Daily Briefing Agent**: 
+   - Takes the Weekly Topic. Outputs a comprehensive `Briefing` JSON: Goal, Target Audience, Format (e.g., `carousel_cover`), Tone, Hook, and Call to Action.
+
+### Flow 2: The Makers (`core/cascade/makers.py`)
+1. **Visual Designer**: 
+   - *Input*: Daily Briefing.
+   - *Output*: `VisualJSONPrompt` (Describes foreground, background, typography, colors). This JSON is passed to a Multimodal Generator (e.g., DALL-E or Flux) to generate the Cover Image.
+2. **Slide Content Generator**: 
+   - *Input*: Daily Briefing.
+   - *Output*: JSON Array of `[{titulo, conteudo}, ...]`. Passed to `PillowRenderer` to draw internal image assets natively.
+3. **Copywriter**: 
+   - *Input*: Daily Briefing + `VisualJSONPrompt`.
+   - *Output*: Social media caption optimized for the target platform, incorporating hook, hashtags, and line breaks.

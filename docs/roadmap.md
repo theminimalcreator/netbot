@@ -1,7 +1,7 @@
 # 🗺️ Roadmap Atualizado: NetBot "Digital Twin"
 
-**Status do Projeto:** 🟡 Em Transição (V1 → V1.1)
-**Visão:** Validar a "Alma" do bot com memória de longo prazo, inteligência social (análise de perfil) e expansão para redes de texto.
+**Status do Projeto:** 🟢 Em Produção (V2)
+**Visão:** Validar a "Alma" do bot com memória de longo prazo, inteligência social (análise de perfil) e publicação autônoma multimídia (V2).
 
 ---
 
@@ -58,14 +58,17 @@
 
 ---
 
-## ✅ V2: O Criador (Content Machine)
-**Foco:** Deixar de reagir e começar a publicar (Agente Ativo).
+## ✅ V2: O Criador & Content Cascade
+**Foco:** Deixar de reagir e começar a publicar carrosséis e posts multimidia nativos e automatizados.
 
-* **Redes:** Todas as anteriores.
-* **Funcionalidades:**
-    * [x] **Trend Watcher:** Monitorar RSS feeds de tecnologia (`scripts/fetch_news.py`).
-    * [x] **Agente Autor:** Gerar updates de projetos pessoais (`scripts/generate_project_updates.py`).
-    * [x] **Editor Chef:** Transformar ideias em posts nativos para cada rede (`core/editor_chef.py`).
+* **Arquitetura (Cascade Engine):**
+    * [x] **The Strategists:** Agentes de planejamento Mensal (`StrategicRoadmapper`), Semanal (`WeeklyTactician`) e Diário (`DailyBriefingAgent`).
+    * [x] **The Makers:** Agentes de produção (`VisualDesigner`, `SlideContentGenerator`, `Copywriter`).
+* **Visual Engine:**
+    * [x] **PillowRenderer:** Motor dinâmico implementado para desenhar os Carrosséis 4:5 internos (Bg Color, radial gradient, e fontes dinâmicas baseadas em marca).
+* **Automação UI & Workflow:**
+    * [x] **Human-in-the-Loop:** Aprovação de publicação (Makers) enviada via Telegram.
+    * [x] **Playwright Instagram Publisher:** Injeção direta de assets em um browser headless via Playwright para driblar restrições da Graph API do Instagram.
 
 ---
 
@@ -89,8 +92,8 @@
 
 ---
 
-### 📝 Próximos Passos Técnicos (Prioridade V1)
+### 📝 Próximos Passos Técnicos (Prioridade V3)
 
-1.  **Database:** Ativar `vector` no Supabase.
-2.  **Profile Analyzer:** Criar o script que pega os 10 últimos posts de um usuário.
-3.  **Knowledge Base:** Implementar a classe de RAG.
+1.  **Observability LangFuse:** Integrar telemetria nativa no pipeline de LangGraph/Agno.
+2.  **Expansão Playwright:** Adaptar o mesmo `PlaywrightPublisher` que brilha no Instagram para postar nas outras redes (LinkedIn, Threads, Twitter).
+3.  **Human-in-the-Loop em massa:** Fazer o Telegram Gateway permitir agendamento em batch (Schedule queue).

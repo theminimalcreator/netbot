@@ -14,50 +14,55 @@ graph TD
     subgraph "Entry Points"
         CLI[netbot.py (CLI)]
         Main[main.py (Orchestrator)]
+        Cascade[scripts/content_orchestrator.py]
     end
 
-    subgraph "Core Logic"
-        Agent[SocialAgent (Agno + GPT-4o)]
-        RAG[(Knowledge Base / PgVector)]
-        DB[(Supabase DB)]
+    subgraph "Core Reaction Logic (V1)"
+        Agent[SocialAgent (Agno)]
+        RAG[(PgVector Memory)]
         Profile[Profile Analyzer]
-        Editor[Editor Chef]
     end
 
-    subgraph "Network Layer"
+    subgraph "Active Content Cascade (V2)"
+        Roadmap[Strategic Roadmapper]
+        Tactician[Weekly Tactician]
+        Brief[Daily Briefer]
+        Makers[Design / Copy / Slides / Render]
+        Approve[Telegram In-the-Loop]
+    end
+
+    subgraph "Publishers & Networks"
+        PW[Playwright Publisher]
         IG[Instagram Client]
         TW[Twitter Client]
-        TH[Threads Client]
-        DT[Dev.to Client]
     end
 
-    Main -->|Loop| IG & TW & TH & DT
-    Main -->|Updates| CLI
+    Cascade --> Roadmap --> Tactician --> Brief --> Makers
+    Makers --> Approve --> PW
     
-    IG & TW & TH & DT -->|Fetch Posts| Agent
-    Agent <-->|Context| RAG
-    Agent -->|Decision| Main
-    Main -->|Action| IG & TW & TH & DT
-    Main -->|Log| DB
-    
-    classDef storage fill:#f9f,stroke:#333,stroke-width:2px;
-    class DB,RAG storage;
+    Main -->|Fetch| IG & TW
+    IG & TW --> Agent <--> RAG
 ```
 
 ## 3. Core Components
 
-### 3.1 Orchestrator (`main.py`)
-The central nervous system. It runs an infinite loop (`run_cycle`) that:
-1.  **Checks Triggers**: Fetches news (`NewsFetcher`) and generates project updates (`ProjectUpdateGenerator`).
-2.  **Iterates Configured Platforms**: Processes enabled networks sequentially.
-3.  **Enforces Limits**: Checks daily interaction limits in Supabase before acting.
-4.  **Manages Resources**: Handles browser startup/shutdown via `BrowserManager`.
+### 3.1 Content Orchestrator (`scripts/content_orchestrator.py`)
+The autonomous content machine (V2). Runs daily to generate high-quality visual + text assets via a multi-agent assembly line.
+1.  **Strategists**: Calculates Monthly Theme > Weekly Topic > Daily Briefing.
+2.  **Makers**: Translates the briefing into JSON payloads, visual covers, rendered carousel slides (`PillowRenderer`), and conversational copy.
+3.  **Approval**: Pings the owner via Telegram. Waits for an active `approve` callback.
+4.  **Publishing**: Directly hands the approved content to a headless `PlaywrightInstagramPublisher`.
 
-### 3.2 The "Brain" (`core/agent.py`)
+### 3.2 Main Interaction Loop (`main.py`)
+The community engagement loop (V1). Runs continuously to consume the infinite feed.
+1.  **Iterates Configured Platforms**: Processes enabled networks sequentially (Twitter, Threads, etc.).
+2.  **Enforces Limits**: Checks daily interaction limits in Supabase before acting.
+
+### 3.3 The "Brain" (`core/agent.py`)
 Encapsulated in `SocialAgent`.
 -   **Model**: GPT-4o-mini via `agno`.
--   **Persona**: Loaded from `docs/persona/persona.md`.
--   **Decision Making**: `decide_and_comment(post, dossier)` method analyzes content + context + image to output a structured `ActionDecision`.
+-   **Persona**: Loaded from `docs/persona/brand.md`.
+-   **Decision Making**: analyzes content + context + image to output a structured `ActionDecision`.
 -   **Memory (RAG)**: Stores past interactions in `NetBotKnowledgeBase` (PgVector) to avoid repetition and maintain consistency.
 
 ### 3.3 Network Layer (`core/networks/`)
@@ -114,40 +119,30 @@ sequenceDiagram
     end
 ```
 
-### 6.2 Publication Flow (Editor Chef)
-**Goal**: Transform pending ideas into platform-native posts and publish them.
+### 6.2 The Content Cascade (V2 Autopilot)
+**Goal**: From blank canvas to published post via sequential specialized AI chains and programmatic rendering.
 
 ```mermaid
 graph TD
-    Start[Cycle Start] --> CheckLimits{Can Publish Today?}
-    CheckLimits -- No --> End[Skip]
-    CheckLimits -- Yes --> Select{Select Content}
+    Start[content_orchestrator.py] --> Strategy{Strategy Alignment}
     
-    Select -->|Project Day| GetProject[Fetch Project Update]
-    Select -->|Normal Day| GetNews[Fetch News/Insight]
+    Strategy -->|Monthly| MR[Strategic Roadmapper]
+    Strategy -->|Weekly| WT[Weekly Tactician]
+    Strategy -->|Daily| DB[Daily Briefer]
     
-    GetProject & GetNews --> HasContent{Found Idea?}
-    HasContent -- No --> End
-    HasContent -- Yes --> Transform[AI Transformation Agent]
+    DB --> Makers{The Assembly Line}
+    Makers --> VD[Visual Designer -> Cover]
+    Makers --> SG[Slide Generator -> N Slides]
+    Makers --> CW[Copywriter -> Caption]
     
-    Transform -->|Input: Idea| AI
-    AI -->|Output: SocialCopy| Review
+    VD & SG --> Render[PillowRenderer]
+    Render -->|Math + Hex Colors| FinalImages[Rendered JPEG/PNGs]
     
-    subgraph AI Logic
-        direction TB
-        P[Persona]
-        Rules[Platform Rules]
-        Context[Source Content]
-        P & Rules & Context --> Gen[Generate Post]
-    end
+    FinalImages & CW --> DB2[Supabase Content Queue]
+    DB2 --> Telegram[Telegram Notification]
     
-    Review{Dry Run?}
-    Review -- Yes --> Log[Log to Console]
-    Review -- No --> Publish[Client.post_content()]
-    
-    Publish --> Success{Success?}
-    Success -- Yes --> DBUpdate[Update DB: status='published']
-    Success -- No --> Error[Log Error]
+    Telegram -->|User Clicks Approve| Playwright[Playwright Publisher]
+    Playwright -->|Headless Browser| Instagram
 ```
 
 ### 6.3 Discovery & Interaction Cycle
